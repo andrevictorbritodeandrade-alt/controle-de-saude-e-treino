@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+
+  /* Redefine Tailwind standard colors for a premium sporty dark theme */
+  --color-white: #111827;       /* Deep graphite card background */
+  --color-slate-50: #162030;    /* Muted sub-card background */
+  --color-slate-100: #0b0f19;   /* Deep body background */
+  --color-slate-200: #1e293b;   /* Soft slate borders */
+  --color-slate-300: #334155;   /* Strong slate borders */
+  --color-slate-400: #64748b;   /* Silver gray */
+  --color-slate-500: #94a3b8;   /* Visible grey text */
+  --color-slate-600: #cbd5e1;   /* Medium light text */
+  --color-slate-700: #e2e8f0;   /* Light text */
+  --color-slate-800: #f1f5f9;   /* Crisp body text */
+  --color-slate-900: #ffffff;   /* Pure white text */
+
+  --color-stone-50: #162030;
+  --color-stone-100: #1a2436;
+  --color-stone-200: #1e293b;
+  --color-stone-300: #334155;
+  --color-stone-400: #64748b;
+  --color-stone-500: #94a3b8;
+  --color-stone-600: #cbd5e1;
+  --color-stone-700: #e2e8f0;
+  --color-stone-800: #f1f5f9;
+  --color-stone-900: #ffffff;
+}
+
+@layer base {
+  html, body {
+    @apply h-full overflow-hidden;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+  
+  #root {
+    @apply h-full overflow-y-auto bg-[#000000];
+  }
+
+  /* Core background states */
+  .bg-white {
+    background-color: #0a0a0a !important;
+    border-color: #1a1a1a !important;
+  }
+
+  header.bg-white {
+    background-color: #000000 !important;
+    border-color: #1a1a1a !important;
+  }
+
+  .bg-slate-100 {
+    background-color: #000000 !important;
+  }
+
+  .bg-stone-100 {
+    background-color: #111111 !important;
+  }
+
+  .bg-slate-50, .bg-stone-50, .bg-slate-[50\/50] {
+    background-color: #111111 !important;
+  }
+
+  div.bg-slate-50, div.bg-stone-50 {
+    background-color: #111111 !important;
+    border-color: #1a1a1a !important;
+  }
+
+  /* High contrast readable input styles */
+  input, select, textarea {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+    border-color: #1a1a1a !important;
+    border-width: 2px !important;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: #ef4444 !important;
+    outline: none !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #5f759c !important;
+  }
+
+  /* Precision high-contrast text tags */
+  [class*="text-slate-900"], [class*="text-stone-900"], [class*="text-blue-950-"] {
+    color: #ffffff !important;
+  }
+
+  [class*="text-slate-800"], [class*="text-stone-800"], [class*="text-slate-700"], [class*="text-stone-700"] {
+    color: #f1f5f9 !important;
+  }
+
+  [class*="text-slate-600"], [class*="text-stone-600"], [class*="text-slate-500"], [class*="text-stone-500"], [class*="text-slate-400"], [class*="text-stone-400"], [class*="text-slate-300"], [class*="text-stone-300"] {
+    color: #94a3b8 !important;
+  }
+
+  /* Keep custom indicator colors highly saturated and neon to look stunning in dark mode */
+  [class*="text-blue-600"] {
+    color: #ef4444 !important; /* Replacing blue with red as requested */
+  }
+  
+  [class*="text-blue-500"] {
+    color: #ef4444 !important; /* Replacing blue with red as requested */
+  }
+
+  [class*="text-blue-950"] {
+    color: #ffffff !important;
+  }
+
+  [class*="text-green-600"], [class*="text-emerald-500"], [class*="text-emerald-600"] {
+    color: #ef4444 !important; /* Make sure all success variants are red since user requested red and white */
+  }
+
+  [class*="text-red-500"], [class*="text-red-600"] {
+    color: #ef4444 !important;
+  }
+
+  [class*="text-amber-500"], [class*="text-orange-500"] {
+    color: #ef4444 !important;
+  }
+
+  /* Beautifully styled transparent badges in dark mode */
+  [class*="bg-blue-50"] {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+  }
+
+  [class*="bg-blue-100"] {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+    color: #fca5a5 !important;
+  }
+
+  [class*="bg-emerald-50"], [class*="bg-amber-50"], [class*="bg-purple-50"], [class*="bg-red-50"] {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.25) !important;
+  }
+
+  /* Precision Recharts dark-theme styles */
+  .recharts-cartesian-axis-tick-value {
+    fill: #94a3b8 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+  }
+
+  .recharts-legend-item-text {
+    color: #e2e8f0 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+  }
+
+  .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
+    stroke: rgba(255, 255, 255, 0.08) !important;
+    stroke-dasharray: 4 4;
+  }
+
+  .recharts-default-tooltip {
+    background-color: #1f2937 !important;
+    border: 1px solid #374151 !important;
+    border-radius: 12px !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .recharts-tooltip-label {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+  }
+
+  .recharts-tooltip-item {
+    color: #60a5fa !important;
+    font-weight: 700 !important;
+  }
+
+  .active-tab-class {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+  }
+
+  /* Global scrollbar hide */
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+

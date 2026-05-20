@@ -1,0 +1,8 @@
+{
+  "name": "Controle de Saúde e Treinos",
+  "description": "A personalized diet and hydration tracker with meal scheduling and macro monitoring.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}

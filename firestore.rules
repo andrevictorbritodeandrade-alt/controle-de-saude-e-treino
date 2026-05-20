@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default Catch-All Deny Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive and General ID Validation Checks
+    function isValidId(id) {
+       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidUserId(userId) {
+      return userId == 'andre';
+    }
+
+    // Type, Integrity, and Schema Validation Blueprints
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'name']) && 
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 128 &&
+             (!('avatarDesc' in data) || (data.avatarDesc is string && data.avatarDesc.size() <= 2000)) &&
+             (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 3000000)) &&
+             (!('avatarVersion' in data) || (data.avatarVersion is string && data.avatarVersion.size() <= 20)) &&
+             (!('isAutistic' in data) || data.isAutistic is bool) &&
+             (!('hasADHD' in data) || data.hasADHD is bool) &&
+             (!('anamnesisCompleted' in data) || data.anamnesisCompleted is bool) &&
+             (!('dietPlan' in data) || data.dietPlan is map);
+    }
+
+    function isValidDailyLog(data) {
+      return (!('confirmedMeals' in data) || data.confirmedMeals is map) &&
+             (!('waterIntake' in data) || data.waterIntake is number) &&
+             (!('waterGoal' in data) || data.waterGoal is number) &&
+             (!('healthMeasurements' in data) || data.healthMeasurements is map);
+    }
+
+    // Enforce size bounds and array type basics
+    function isValidProgress(data) {
+      return (!('data' in data) || (data.data is list && data.data.size() <= 500)) &&
+             (!('workouts' in data) || (data.workouts is list && data.workouts.size() <= 500));
+    }
+
+    // Connection Test Document Match
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // User Profile matching (andre only)
+    match /users/{userId} {
+      allow read: if isValidUserId(userId) && isValidId(userId);
+      allow create, update: if isValidUserId(userId) && isValidId(userId) && isValidUser(incoming());
+      allow delete: if false;
+
+      // Nested Daily Nutrition & Health Logs
+      match /dailyLogs/{date} {
+        allow read: if isValidUserId(userId) && isValidId(userId) && isValidId(date);
+        allow create, update: if isValidUserId(userId) && isValidId(userId) && isValidId(date) && isValidDailyLog(incoming());
+        allow delete: if false;
+      }
+
+      // Nested Weight & Workout Progress Data
+      match /progress/{docId} {
+        allow read: if isValidUserId(userId) && isValidId(userId) && docId == 'main';
+        allow create, update: if isValidUserId(userId) && isValidId(userId) && docId == 'main' && isValidProgress(incoming());
+        allow delete: if false;
+      }
+    }
+  }
+}
