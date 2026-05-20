@@ -143,7 +143,7 @@ const Anamnesis: React.FC<AnamnesisProps> = ({ user, onComplete }) => {
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`max-w-[85%] p-4 rounded-3xl shadow-sm ${
-              msg.role === 'user' ? 'bg-slate-900 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-stone-100'
+              msg.role === 'user' ? 'bg-[#1c1c1c] text-white rounded-tr-none border border-[#333]' : 'bg-[#121212] text-white rounded-tl-none border border-[#333]'
             }`}>
               <p className="text-sm font-medium leading-relaxed">{msg.text}</p>
             </div>

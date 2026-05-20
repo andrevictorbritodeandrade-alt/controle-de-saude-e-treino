@@ -162,13 +162,67 @@ export const WeightMetrics: React.FC<{ currentUser?: User }> = ({ currentUser })
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-              <XAxis dataKey="date" stroke="#666" />
-              <YAxis domain={['auto', 'auto']} stroke="#666" />
-              <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', borderColor: '#222', color: '#fff' }} />
-              <Legend />
-              <Line type="monotone" dataKey="weight" stroke="#ffffff" name="Peso" strokeWidth={3} dot={{ r: 6, fill: '#ffffff', strokeWidth: 2, stroke: '#000' }}>
-                <LabelList dataKey="weight" position="top" offset={10} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#ffffff' }} />
+              <defs>
+                <linearGradient id="weightLineGradient" x1="0" y1="0" x2="1" y2="0">
+                  {data.map((_, i) => {
+                    if (i === 0) return null;
+                    const prev = data[i - 1].weight;
+                    const curr = data[i].weight;
+                    const color = curr < prev ? '#22c55e' : curr > prev ? '#ef4444' : '#ffffff';
+                    const startPerc = ((i - 0.5) / (data.length - 1)) * 100;
+                    const endPerc = (i / (data.length - 1)) * 100;
+                    // We need a stop at point i-1 and point i
+                    const prevPerc = ((i - 1) / (data.length - 1)) * 100;
+                    const currPerc = (i / (data.length - 1)) * 100;
+                    return (
+                      <React.Fragment key={i}>
+                        <stop offset={`${prevPerc}%`} stopColor={color} />
+                        <stop offset={`${currPerc}%`} stopColor={color} />
+                      </React.Fragment>
+                    );
+                  })}
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="date" 
+                stroke="#666" 
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                domain={['auto', 'auto']} 
+                stroke="#666" 
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0a0a0a', borderColor: '#222', color: '#fff' }} 
+                itemStyle={{ color: '#fff' }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="weight" 
+                stroke="url(#weightLineGradient)" 
+                strokeWidth={3}
+                dot={(props: any) => {
+                  const { cx, cy, payload, index } = props;
+                  if (index === 0) return <circle key={index} cx={cx} cy={cy} r={5} fill="#ffffff" stroke="#000" strokeWidth={2} />;
+                  const prev = data[index - 1].weight;
+                  const curr = payload.weight;
+                  const color = curr < prev ? '#22c55e' : curr > prev ? '#ef4444' : '#ffffff';
+                  return <circle key={index} cx={cx} cy={cy} r={5} fill={color} stroke="#000" strokeWidth={2} />;
+                }}
+                isAnimationActive={false}
+              >
+                <LabelList 
+                  dataKey="weight" 
+                  position="top" 
+                  offset={12} 
+                  style={{ fontSize: '10px', fontWeight: 'bold', fill: '#ffffff' }} 
+                />
               </Line>
             </LineChart>
           </ResponsiveContainer>
@@ -180,7 +234,7 @@ export const WeightMetrics: React.FC<{ currentUser?: User }> = ({ currentUser })
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#222" />
+              {/* CartesianGrid removed as requested */}
               <XAxis dataKey="date" stroke="#666" />
               <YAxis stroke="#666" />
               <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', borderColor: '#222', color: '#fff' }} />

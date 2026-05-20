@@ -98,9 +98,8 @@ const App = () => {
   const [isDiaDeTreino, setIsDiaDeTreino] = useState(() => {
     const day = new Date().getDay();
     // 0: Domingo, 1: Segunda, 2: Terça, 3: Quarta, 4: Quinta, 5: Sexta, 6: Sábado
-    // Treino: Seg(1), Ter(2), Qui(4), Sex(5), Sáb(6)
-    // Descanso: Qua(3), Dom(0)
-    return [1, 2, 4, 5, 6].includes(day);
+    // Descanso: Sáb(6), Dom(0)
+    return ![0, 6].includes(day);
   });
   const [selectedMeal, setSelectedMeal] = useState<number | null>(null);
   const [currentDayName, setCurrentDayName] = useState('');
@@ -1308,8 +1307,8 @@ const App = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className={`mb-6 p-6 rounded-[2.5rem] border-2 shadow-lg flex items-center gap-5 transition-all
                   ${nextFullAssessment.isOverdue 
-                    ? 'bg-rose-50 border-rose-200 text-rose-900 shadow-rose-100' 
-                    : 'bg-red-900/10 border-red-900/30 text-amber-900 shadow-amber-100'}`}
+                    ? 'bg-red-900/10 border-red-900/30 text-red-500 shadow-xl' 
+                    : 'bg-red-900/10 border-red-900/30 text-red-500 shadow-xl'}`}
               >
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner
                   ${nextFullAssessment.isOverdue ? 'bg-rose-500' : 'bg-red-500'}`}>
@@ -1547,7 +1546,7 @@ const App = () => {
             {confirmedMeals[101] && confirmedMeals[101].option === 'C' && (
               <div className="bg-red-900/10 border-l-4 border-yellow-400 p-4 rounded-xl flex gap-3 items-start">
                 <AlertTriangle className="text-yellow-500 shrink-0" size={20} />
-                <p className="text-xs font-medium text-amber-900 leading-relaxed">
+                <p className="text-xs font-medium text-yellow-500 leading-relaxed">
                   Atenção: A mortadela do café superou a meta de sódio. Beba água para filtrar o excesso!
                 </p>
               </div>
@@ -1953,11 +1952,11 @@ const App = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-[#1a1a1a] pb-safe pt-2 px-6 z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <div className="max-w-xl mx-auto flex justify-between items-center h-20">
           <button 
-            onClick={() => setActiveTab('saude')}
-            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'saude' ? 'text-red-600' : 'text-white'} flex-1`}
+            onClick={() => setShowPhysicalAssessment(true)}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${showPhysicalAssessment ? 'text-red-600' : 'text-white'} flex-1`}
           >
-            <Activity className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Saúde</span>
+            <ClipboardList className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Avaliação</span>
           </button>
 
           <button 
@@ -1969,19 +1968,19 @@ const App = () => {
           </button>
 
           <button 
-            onClick={() => setShowPhysicalAssessment(true)}
-            className={`flex flex-col items-center gap-1.5 transition-colors ${showPhysicalAssessment ? 'text-red-600' : 'text-white'} flex-1`}
-          >
-            <ClipboardList className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Avaliação</span>
-          </button>
-
-          <button 
             onClick={() => setActiveTab('poviztra')}
             className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'poviztra' ? 'text-red-600' : 'text-white'} flex-1`}
           >
             <Syringe className="w-6 h-6" />
             <span className="text-[10px] font-black uppercase tracking-widest">Poviztra</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('saude')}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'saude' ? 'text-red-600' : 'text-white'} flex-1`}
+          >
+            <Activity className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Saúde</span>
           </button>
         </div>
       </nav>

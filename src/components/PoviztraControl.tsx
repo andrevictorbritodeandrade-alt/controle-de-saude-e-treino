@@ -88,7 +88,7 @@ export const PoviztraControl = () => {
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     const currentWeek = Math.ceil((diffDays + 1) / 7) || 1;
-    const currentDose = currentWeek <= 2 ? 4 : 6;
+    const currentDose = 6;
 
     let tempUnits = ozempic.remainingUnits;
     let daysRemaining = 0;
@@ -330,11 +330,7 @@ export const PoviztraControl = () => {
               <p className="text-[10px] font-black text-red-400 uppercase mb-3 tracking-widest">Protocolo de Aplicação</p>
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/60 font-bold">Semana 1 e 2</span>
-                  <span className="text-white font-black">4 clicks / dia</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/60 font-bold">Semana 3 em diante</span>
+                  <span className="text-white/60 font-bold">Dose Atual (A partir de hoje)</span>
                   <span className="text-white font-black">6 clicks / dia</span>
                 </div>
                 <p className="text-[9px] text-white/40 mt-2 italic leading-relaxed">

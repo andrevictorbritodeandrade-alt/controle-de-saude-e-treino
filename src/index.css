@@ -3,30 +3,6 @@
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-montserrat: "Montserrat", sans-serif;
-
-  /* Redefine Tailwind standard colors for a premium sporty dark theme */
-  --color-white: #111827;       /* Deep graphite card background */
-  --color-slate-50: #162030;    /* Muted sub-card background */
-  --color-slate-100: #0b0f19;   /* Deep body background */
-  --color-slate-200: #1e293b;   /* Soft slate borders */
-  --color-slate-300: #334155;   /* Strong slate borders */
-  --color-slate-400: #64748b;   /* Silver gray */
-  --color-slate-500: #94a3b8;   /* Visible grey text */
-  --color-slate-600: #cbd5e1;   /* Medium light text */
-  --color-slate-700: #e2e8f0;   /* Light text */
-  --color-slate-800: #f1f5f9;   /* Crisp body text */
-  --color-slate-900: #ffffff;   /* Pure white text */
-
-  --color-stone-50: #162030;
-  --color-stone-100: #1a2436;
-  --color-stone-200: #1e293b;
-  --color-stone-300: #334155;
-  --color-stone-400: #64748b;
-  --color-stone-500: #94a3b8;
-  --color-stone-600: #cbd5e1;
-  --color-stone-700: #e2e8f0;
-  --color-stone-800: #f1f5f9;
-  --color-stone-900: #ffffff;
 }
 
 @layer base {
