@@ -127,7 +127,13 @@ interface ExerciseTrackerProps {
 }
 
 export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser }) => {
-  const [workouts, setWorkouts] = useState<Workout[]>(initialWorkouts);
+  const [workouts, setWorkouts] = useState<Workout[]>(() => {
+    if (currentUser) {
+      const saved = localStorage.getItem(`workouts_${currentUser.id}`);
+      if (saved) return JSON.parse(saved);
+    }
+    return initialWorkouts;
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncingFit, setIsSyncingFit] = useState(false);
   const [isConnectedToFit, setIsConnectedToFit] = useState(false);
@@ -141,7 +147,9 @@ export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser })
         if (cloudData && cloudData.workouts) {
           const existingIds = new Set(cloudData.workouts.map((w: any) => w.id));
           const newInitials = initialWorkouts.filter(w => !existingIds.has(w.id));
-          setWorkouts([...cloudData.workouts, ...newInitials]);
+          const merged = [...cloudData.workouts, ...newInitials];
+          setWorkouts(merged);
+          localStorage.setItem(`workouts_${currentUser.id}`, JSON.stringify(merged));
         } else {
           setWorkouts(initialWorkouts);
         }
@@ -156,6 +164,7 @@ export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser })
   useEffect(() => {
     if (currentUser && isDataLoaded) {
       saveProgressData(currentUser.id, { workouts }).catch(console.error);
+      localStorage.setItem(`workouts_${currentUser.id}`, JSON.stringify(workouts));
     }
   }, [workouts, currentUser, isDataLoaded]);
 

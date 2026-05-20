@@ -31,7 +31,13 @@ export const initialData: ProgressEntry[] = [
 ];
 
 export const WeightMetrics: React.FC<{ currentUser?: User }> = ({ currentUser }) => {
-  const [data, setData] = useState<ProgressEntry[]>(initialData);
+  const [data, setData] = useState<ProgressEntry[]>(() => {
+    if (currentUser) {
+      const saved = localStorage.getItem(`weight_data_${currentUser.id}`);
+      if (saved) return JSON.parse(saved);
+    }
+    return initialData;
+  });
   const [newWeight, setNewWeight] = useState('');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -40,6 +46,7 @@ export const WeightMetrics: React.FC<{ currentUser?: User }> = ({ currentUser })
       const unsubscribe = subscribeToProgressData(currentUser.id, (cloudData) => {
         if (cloudData && cloudData.data && cloudData.data.length > 0) {
           setData(cloudData.data);
+          localStorage.setItem(`weight_data_${currentUser.id}`, JSON.stringify(cloudData.data));
         }
         setIsDataLoaded(true);
       });
@@ -52,6 +59,7 @@ export const WeightMetrics: React.FC<{ currentUser?: User }> = ({ currentUser })
   useEffect(() => {
     if (currentUser && isDataLoaded) {
       saveProgressData(currentUser.id, { data }).catch(console.error);
+      localStorage.setItem(`weight_data_${currentUser.id}`, JSON.stringify(data));
     }
   }, [data, currentUser, isDataLoaded]);
 

@@ -1,44 +1,84 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Pill, Droplet, RefreshCcw, CheckCircle2, Timer, Beaker, AlertCircle, List, ChevronDown, ChevronUp, ShoppingCart, CalendarDays, TrendingUp } from 'lucide-react';
+import { User } from '../types';
+import { savePoviztraData, subscribeToPoviztraData } from '../services/firestoreService';
 
-export const PoviztraControl = () => {
+export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }) => {
   // --- ESTADOS ---
-  const [globalHistory, setGlobalHistory] = useState<{ id: number; name: string; timestamp: string }[]>([
-    { id: 13, name: 'CONSULTA: Reavaliação Poviztra (Dr. Noé)', timestamp: '29/05/2026 10:00:00' },
-    { id: 12, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '19/05/2026 08:00:00' },
-    { id: 11, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '18/05/2026 08:00:00' },
-    { id: 10, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '16/05/2026 08:00:00' },
-    { id: 9, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '15/05/2026 08:00:00' },
-    { id: 8, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '14/05/2026 08:00:00' },
-    { id: 7, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '13/05/2026 08:00:00' },
-    { id: 6, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '12/05/2026 08:00:00' },
-    { id: 5, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '11/05/2026 08:00:00' },
-    { id: 4, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '09/05/2026 08:00:00' },
-    { id: 3, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '08/05/2026 08:00:00' },
-    { id: 2, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '07/05/2026 08:00:00' },
-    { id: 1, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '06/05/2026 08:00:00' }
-  ]);
+  const [globalHistory, setGlobalHistory] = useState<{ id: number; name: string; timestamp: string }[]>(() => {
+    const saved = localStorage.getItem(`history_${currentUser.id}`);
+    return saved ? JSON.parse(saved) : [
+      { id: 13, name: 'CONSULTA: Reavaliação Poviztra (Dr. Noé)', timestamp: '29/05/2026 10:00:00' },
+      { id: 12, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '19/05/2026 08:00:00' },
+      { id: 11, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '18/05/2026 08:00:00' },
+      { id: 10, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '16/05/2026 08:00:00' },
+      { id: 9, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '15/05/2026 08:00:00' },
+      { id: 8, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '14/05/2026 08:00:00' },
+      { id: 7, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '13/05/2026 08:00:00' },
+      { id: 6, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '12/05/2026 08:00:00' },
+      { id: 5, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '11/05/2026 08:00:00' },
+      { id: 4, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '09/05/2026 08:00:00' },
+      { id: 3, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '08/05/2026 08:00:00' },
+      { id: 2, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '07/05/2026 08:00:00' },
+      { id: 1, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '06/05/2026 08:00:00' }
+    ];
+  });
   const [expandedSection, setExpandedSection] = useState('summary');
 
   const [showPrescription, setShowPrescription] = useState(false);
 
   // Poviztra: 300 clicks totais
-  const [ozempic, setOzempic] = useState({
-    name: 'Poviztra',
-    totalUnits: 300,
-    remainingUnits: 248, // Total of 52 clicks used (13 doses)
-    startWeight: 101.7, // Peso inicial informado
-    purchaseDate: '2026-05-06',
-    startDate: '2026-05-06',
+  const [ozempic, setOzempic] = useState(() => {
+    const saved = localStorage.getItem(`ozempic_${currentUser.id}`);
+    return saved ? JSON.parse(saved) : {
+      name: 'Poviztra',
+      totalUnits: 300,
+      remainingUnits: 248, // Total of 52 clicks used (13 doses)
+      startWeight: 101.7, // Peso inicial informado
+      purchaseDate: '2026-05-06',
+      startDate: '2026-05-06',
+    };
   });
 
   // Vitaminas
-  const [vitamins, setVitamins] = useState<Record<string, any>>({
-    b12: { name: 'Vitamina B12', lastDose: null, nextDose: null, cyclePhase: 'active' },
-    vitD: { name: 'Vitamina D', lastDose: null, nextDose: null, cyclePhase: 'active' },
-    iron: { name: 'Ferro', lastDose: null, nextDose: null },
-    vonau: { name: 'Vonau Flash (SOS)', lastDose: null, nextDose: null, description: '8mg - Para náuseas/vômitos' }
+  const [vitamins, setVitamins] = useState<Record<string, any>>(() => {
+    const saved = localStorage.getItem(`vitamins_${currentUser.id}`);
+    return saved ? JSON.parse(saved) : {
+      b12: { name: 'Vitamina B12', lastDose: null, nextDose: null, cyclePhase: 'active' },
+      vitD: { name: 'Vitamina D', lastDose: null, nextDose: null, cyclePhase: 'active' },
+      iron: { name: 'Ferro', lastDose: null, nextDose: null },
+      vonau: { name: 'Vonau Flash (SOS)', lastDose: null, nextDose: null, description: '8mg - Para náuseas/vômitos' }
+    };
   });
+
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // Load from Cloud
+  useEffect(() => {
+    if (currentUser) {
+      const unsubscribe = subscribeToPoviztraData(currentUser.id, (cloudData) => {
+        if (cloudData) {
+          if (cloudData.globalHistory) setGlobalHistory(cloudData.globalHistory);
+          if (cloudData.ozempic) setOzempic(cloudData.ozempic);
+          if (cloudData.vitamins) setVitamins(cloudData.vitamins);
+        }
+        setIsDataLoaded(true);
+      });
+      return () => unsubscribe();
+    }
+  }, [currentUser]);
+
+  // Save to Cloud and LocalStorage
+  useEffect(() => {
+    if (currentUser && isDataLoaded) {
+      const data = { globalHistory, ozempic, vitamins };
+      savePoviztraData(currentUser.id, data).catch(console.error);
+      
+      localStorage.setItem(`history_${currentUser.id}`, JSON.stringify(globalHistory));
+      localStorage.setItem(`ozempic_${currentUser.id}`, JSON.stringify(ozempic));
+      localStorage.setItem(`vitamins_${currentUser.id}`, JSON.stringify(vitamins));
+    }
+  }, [globalHistory, ozempic, vitamins, currentUser, isDataLoaded]);
 
   // EXAME 06/01/2026
   const examData = useMemo(() => ({

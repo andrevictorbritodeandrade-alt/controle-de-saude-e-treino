@@ -144,3 +144,30 @@ export const subscribeToProgressData = (userId: string, callback: (data: any) =>
     }
   );
 };
+
+export const savePoviztraData = async (userId: string, data: any) => {
+  const path = `users/${userId}/poviztra/main`;
+  try {
+    await setDoc(doc(db, 'users', userId, 'poviztra', 'main'), data);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+};
+
+export const subscribeToPoviztraData = (userId: string, callback: (data: any) => void) => {
+  const path = `users/${userId}/poviztra/main`;
+  const docRef = doc(db, 'users', userId, 'poviztra', 'main');
+  return onSnapshot(
+    docRef, 
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data());
+      } else {
+        callback(null);
+      }
+    },
+    (error) => {
+      handleFirestoreError(error, OperationType.GET, path);
+    }
+  );
+};

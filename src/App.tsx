@@ -1013,7 +1013,7 @@ const App = () => {
 
       <div className="max-w-xl mx-auto space-y-4 pt-4 px-3">
         {activeTab === 'exercicios' && <ExerciseTracker currentUser={currentUser} />}
-        {activeTab === 'poviztra' && <PoviztraControl />}
+        {activeTab === 'poviztra' && <PoviztraControl currentUser={currentUser} />}
         {activeTab === 'saude' && (
           <div className="space-y-6 pb-24">
             <WeightMetrics currentUser={currentUser} />
