@@ -553,10 +553,16 @@ const App = () => {
         'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'
       ];
       const now = new Date();
+      const options: Intl.DateTimeFormatOptions = { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      };
+      const formattedDate = now.toLocaleDateString('pt-BR', options);
       const currentDay = days[now.getDay()];
       const totalMinutes = now.getHours() * 60 + now.getMinutes();
       
-      setCurrentDayName(currentDay);
+      setCurrentDayName(`${formattedDate}, ${currentDay}`);
 
       const schedule = cardapioAtual;
       let foundId = schedule[0].id;
@@ -959,8 +965,8 @@ const App = () => {
                 {currentUser.avatarUrl ? (
                   <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-red-600 flex items-center justify-center text-white font-black">
-                    {currentUser.name[0]}
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-red-500 font-black">
+                    <UserIcon size={24} />
                   </div>
                 )}
               </div>

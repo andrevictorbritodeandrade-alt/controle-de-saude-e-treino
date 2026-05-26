@@ -8,13 +8,19 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
   const [globalHistory, setGlobalHistory] = useState<{ id: number; name: string; timestamp: string }[]>(() => {
     const saved = localStorage.getItem(`history_${currentUser.id}`);
     return saved ? JSON.parse(saved) : [
+      { id: 19, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '26/05/2026 08:00:00' },
+      { id: 18, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '25/05/2026 08:00:00' },
+      { id: 17, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '23/05/2026 08:00:00' },
+      { id: 16, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '22/05/2026 08:00:00' },
+      { id: 15, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '21/05/2026 08:00:00' },
+      { id: 14, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '20/05/2026 08:00:00' },
       { id: 13, name: 'CONSULTA: Reavaliação Poviztra (Dr. Noé)', timestamp: '29/05/2026 10:00:00' },
-      { id: 12, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '19/05/2026 08:00:00' },
-      { id: 11, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '18/05/2026 08:00:00' },
-      { id: 10, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '16/05/2026 08:00:00' },
-      { id: 9, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '15/05/2026 08:00:00' },
-      { id: 8, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '14/05/2026 08:00:00' },
-      { id: 7, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '13/05/2026 08:00:00' },
+      { id: 12, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '19/05/2026 08:00:00' },
+      { id: 11, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '18/05/2026 08:00:00' },
+      { id: 10, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '16/05/2026 08:00:00' },
+      { id: 9, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '15/05/2026 08:00:00' },
+      { id: 8, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '14/05/2026 08:00:00' },
+      { id: 7, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '13/05/2026 08:00:00' },
       { id: 6, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '12/05/2026 08:00:00' },
       { id: 5, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '11/05/2026 08:00:00' },
       { id: 4, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '09/05/2026 08:00:00' },
@@ -33,8 +39,8 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
     return saved ? JSON.parse(saved) : {
       name: 'Poviztra',
       totalUnits: 300,
-      remainingUnits: 248, // Total of 52 clicks used (13 doses)
-      startWeight: 101.7, // Peso inicial informado
+      remainingUnits: 206, // Updated: 248 - (6 doses * 6 clicks + 1 * 6 clicks for today) = 206
+      startWeight: 101.7, 
       purchaseDate: '2026-05-06',
       startDate: '2026-05-06',
     };
