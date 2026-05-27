@@ -93,7 +93,7 @@ const App = () => {
     }
   }, []);
 
-  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'receitas' | 'poviztra'>('saude');
+  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'receitas' | 'poviztra' | 'diario' | 'historico'>('saude');
   const [showPhysicalAssessment, setShowPhysicalAssessment] = useState(false);
   const [isDiaDeTreino, setIsDiaDeTreino] = useState(() => {
     const day = new Date().getDay();
@@ -958,7 +958,7 @@ const App = () => {
     <div className="min-h-screen bg-black text-white pb-40 font-sans relative scrollbar-hide">
       {/* HEADER ESTILO DARK THEME */}
       <header className="bg-black rounded-b-[2.5rem] shadow-xl border-b border-[#1a1a1a] p-6 pt-8">
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-xl lg:max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#1f1f1f]">
@@ -1017,14 +1017,18 @@ const App = () => {
         </div>
       </header>
 
-      <div className="max-w-xl mx-auto space-y-4 pt-4 px-3">
+      <div className="max-w-xl lg:max-w-7xl mx-auto space-y-4 pt-4 px-3">
         {activeTab === 'exercicios' && <ExerciseTracker currentUser={currentUser} />}
         {activeTab === 'poviztra' && <PoviztraControl currentUser={currentUser} />}
         {activeTab === 'saude' && (
-          <div className="space-y-6 pb-24">
-            <WeightMetrics currentUser={currentUser} />
-            <div className="bg-[#121212] rounded-[2.5rem] p-8 shadow-xl border border-[#1f1f1f]">
-              <div className="flex items-center justify-between mb-8">
+          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-24 items-start">
+            <div className="space-y-6">
+              <WeightMetrics currentUser={currentUser} />
+            </div>
+            
+            <div className="space-y-6">
+              <div className="bg-[#121212] rounded-[2.5rem] p-8 shadow-xl border border-[#1f1f1f]">
+                <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-red-900/20 rounded-2xl flex items-center justify-center text-red-500">
                     <Activity className="w-8 h-8" />
@@ -1235,11 +1239,58 @@ const App = () => {
             </div>
 
           </div>
+        </div>
+        )}
+
+        {/* INPUT DE IA - GLOBAL */}
+        {(activeTab === 'saude' || activeTab === 'diario') && (
+          <div className="fixed bottom-32 left-1/2 -translate-x-1/2 w-full max-w-xl lg:max-w-4xl px-4 z-40">
+            <div className="bg-[#121212]/90 backdrop-blur-2xl p-3 pl-5 rounded-full border border-[#1f1f1f] shadow-2xl flex items-center gap-3 ring-4 ring-black/40">
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-12 h-12 bg-[#1c1c1c] rounded-full flex items-center justify-center text-gray-400 cursor-pointer hover:text-red-500 hover:bg-[#222] transition-all"
+              >
+                {selectedImage ? (
+                  <div className="relative">
+                    <img src={selectedImage} alt="Preview" className="w-8 h-8 rounded-lg object-cover" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#121212]" />
+                  </div>
+                ) : (
+                  <Plus size={24} />
+                )}
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={(e) => handleImageUpload(e)} 
+                className="hidden" 
+                accept="image/*"
+              />
+              <input 
+                type="text" 
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="O que você comeu? (ex: 2 ovos e café)" 
+                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-white placeholder:text-gray-600 italic"
+              />
+              <button 
+                onClick={handleSendMessage}
+                disabled={isProcessing}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  inputText || selectedImage ? 'bg-red-600 text-white scale-110' : 'bg-[#1c1c1c] text-gray-700'
+                }`}
+              >
+                <Send size={20} className={isProcessing ? 'animate-pulse' : ''} />
+              </button>
+            </div>
+          </div>
         )}
 
         {activeTab === 'diario' && (
-          <>
-            {/* RESUMO DE CALORIAS (MYFITNESSPAL STYLE) */}
+          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
+            <div className="space-y-6">
+              {/* RESUMO DE CALORIAS (MYFITNESSPAL STYLE) */}
             <div className="bg-slate-900 rounded-3xl p-6 text-white shadow-xl shadow-slate-200 mb-6">
               <div className="flex justify-between items-center mb-6">
                 <div className="text-center">
@@ -1387,7 +1438,9 @@ const App = () => {
                 </p>
               </div>
             </div>
+          </div>
 
+          <div className="space-y-6">
             {/* SEÇÃO DE AFERIÇÕES DE SAÚDE */}
             <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6 relative mt-6">
               <div className="flex items-center justify-between mb-4">
@@ -1804,65 +1857,65 @@ const App = () => {
                 </p>
               </div>
             </div>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
         {activeTab === 'historico' && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Resumo da Semana</h2>
-                <TrendingDown className="w-4 h-4 text-red-500" />
-              </div>
-              <div className="flex justify-between items-end h-32 gap-2">
-                {[45, 70, 85, 60, 95, 40, 30].map((height, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                    <div 
-                      className={`w-full rounded-t-lg transition-all duration-500 ${i === 6 ? 'bg-red-500' : 'bg-[#222]'}`}
-                      style={{ height: `${height}%` }}
-                    />
-                    <span className="text-[8px] font-bold text-gray-400 uppercase">{['S', 'T', 'Q', 'Q', 'S', 'S', 'D'][i]}</span>
-                  </div>
-                ))}
+          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
+            <div className="space-y-6">
+              <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Resumo da Semana</h2>
+                  <TrendingDown className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex justify-between items-end h-32 gap-2">
+                  {[45, 70, 85, 60, 95, 40, 30].map((height, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div 
+                        className={`w-full rounded-t-lg transition-all duration-500 ${i === 6 ? 'bg-red-500' : 'bg-[#222]'}`}
+                        style={{ height: `${height}%` }}
+                      />
+                      <span className="text-[8px] font-bold text-gray-400 uppercase">{['S', 'T', 'Q', 'Q', 'S', 'S', 'D'][i]}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6">
-              <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Últimos Registros</h2>
-              <div className="space-y-6">
-                {(Object.entries(confirmedMeals) as [string, MealData][]).reverse().map(([id, meal]) => (
-                  <div key={id} className="flex gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      meal.option === 'A' ? 'bg-red-900/10 text-red-500' : 
-                      meal.option === 'B' ? 'bg-red-900/10 text-red-500' : 'bg-red-50 text-red-500'
-                    }`}>
-                      {meal.option === 'A' ? <CheckCircle2 className="w-5 h-5" /> : 
-                       meal.option === 'B' ? <AlertCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-                    </div>
-                    <div className="flex-1 border-b border-[#222] pb-4">
-                      <div className="flex justify-between mb-1">
-                        <p className="text-sm font-black text-white font-montserrat">{meal.realDescription}</p>
-                        <p className="text-sm font-black text-white font-montserrat">{meal.kcal} kcal</p>
+            <div className="space-y-6">
+              <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6">
+                <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Últimos Registros</h2>
+                <div className="space-y-6">
+                  {(Object.entries(confirmedMeals) as [string, MealData][]).reverse().map(([id, meal]) => (
+                    <div key={id} className="flex gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                        meal.option === 'A' ? 'bg-red-900/10 text-red-500' : 
+                        meal.option === 'B' ? 'bg-red-900/10 text-red-500' : 'bg-red-50 text-red-500'
+                      }`}>
+                        {meal.option === 'A' ? <CheckCircle2 className="w-5 h-5" /> : 
+                         meal.option === 'B' ? <AlertCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
                       </div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hoje • Opção {meal.option}</p>
+                      <div className="flex-1 border-b border-[#222] pb-4">
+                        <div className="flex justify-between mb-1">
+                          <p className="text-sm font-black text-white font-montserrat">{meal.realDescription}</p>
+                          <p className="text-sm font-black text-white font-montserrat">{meal.kcal} kcal</p>
+                        </div>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Hoje • Opção {meal.option}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'receitas' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Livro de Receitas Master Chef</h2>
-              <ChefHat className="w-4 h-4 text-gray-400" />
-            </div>
-
+          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
             {receitas.map((recipe) => (
-              <div key={recipe.id} className="bg-white rounded-[2.5rem] shadow-sm border border-[#333] overflow-hidden">
-                <div className="p-8">
+              <div key={recipe.id} className="bg-white rounded-[2.5rem] shadow-sm border border-[#333] overflow-hidden flex flex-col h-full">
+                <div className="p-8 flex-1">
                   <div className="flex justify-between items-start mb-6">
                     <h3 className="text-xl font-black text-white font-montserrat leading-tight max-w-[70%]">
                       {recipe.titulo}
@@ -1933,7 +1986,7 @@ const App = () => {
                     }));
                     alert(`${recipe.titulo} adicionado ao seu diário!`);
                   }}
-                  className="w-full py-4 bg-[#1c1c1c] text-gray-400 text-[10px] font-black uppercase tracking-widest border-t border-[#222] hover:bg-red-900/10 hover:text-red-500 transition-all"
+                  className="w-full py-4 bg-[#1c1c1c] text-gray-400 text-[10px] font-black uppercase tracking-widest border-t border-[#222] hover:bg-red-900/10 hover:text-red-500 transition-all mt-auto"
                 >
                   Marcar como Feito (Adicionar ao Diário)
                 </button>
@@ -1955,14 +2008,14 @@ const App = () => {
       </footer>
 
       {/* NAVEGAÇÃO INFERIOR */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-[#1a1a1a] pb-safe pt-2 px-6 z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <div className="max-w-xl mx-auto flex justify-between items-center h-20">
+      <nav className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-[#1a1a1a] pb-safe pt-2 px-6 z-50 lg:rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className="max-w-xl lg:max-w-5xl mx-auto flex justify-between items-center h-20">
           <button 
-            onClick={() => setShowPhysicalAssessment(true)}
-            className={`flex flex-col items-center gap-1.5 transition-colors ${showPhysicalAssessment ? 'text-red-600' : 'text-white'} flex-1`}
+            onClick={() => setActiveTab('diario')}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'diario' ? 'text-red-600' : 'text-white'} flex-1`}
           >
-            <ClipboardList className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Avaliação</span>
+            <LayoutDashboard className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Diário</span>
           </button>
 
           <button 
@@ -1970,7 +2023,7 @@ const App = () => {
             className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'exercicios' ? 'text-red-600' : 'text-white'} flex-1`}
           >
             <TrendingDown className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Exercícios</span>
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Treino</span>
           </button>
 
           <button 
@@ -1978,7 +2031,7 @@ const App = () => {
             className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'poviztra' ? 'text-red-600' : 'text-white'} flex-1`}
           >
             <Syringe className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Poviztra</span>
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Poviztra</span>
           </button>
 
           <button 
@@ -1986,7 +2039,15 @@ const App = () => {
             className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'saude' ? 'text-red-600' : 'text-white'} flex-1`}
           >
             <Activity className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Saúde</span>
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Saúde</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('receitas')}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'receitas' ? 'text-red-600' : 'text-white'} flex-1`}
+          >
+            <ChefHat className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Cozinha</span>
           </button>
         </div>
       </nav>

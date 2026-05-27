@@ -241,127 +241,133 @@ export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser })
     <div className="p-4 space-y-6">
       <h2 className="text-2xl font-black text-white font-montserrat uppercase tracking-tight">Exercícios</h2>
       
-      {/* META DE EXERCÍCIOS DIÁRIA */}
-      <div className="bg-[#121212] rounded-[2rem] shadow-xl border border-[#1f1f1f] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-900/20 rounded-xl flex items-center justify-center text-red-500">
-              <Dumbbell className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-wider font-montserrat text-white">Meta de Exercício</h3>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Diário</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-lg font-black text-white font-montserrat">{totalCaloriesBurned} / {exerciseGoal} kcal</p>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="w-full bg-[#1c1c1c] rounded-full h-3 overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-1000 ease-out rounded-full ${
-                exerciseProgress >= 100 ? 'bg-red-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.3)]'
-              }`}
-              style={{ width: `${exerciseProgress}%` }}
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-              {exerciseProgress >= 100 ? 'Meta Atingida! 🔥' : `Faltam ${Math.max(0, exerciseGoal - totalCaloriesBurned)} kcal`}
-            </p>
-            <p className="text-[10px] font-black text-red-500 bg-red-900/20 px-2 py-0.5 rounded-md">
-              {Math.round(exerciseProgress)}%
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      {/* REGISTRO DE TREINOS */}
-      <div className="bg-[#121212] p-4 rounded-[2rem] shadow-xl border border-[#1f1f1f]">
-        <h3 className="text-lg font-bold text-white font-serif mb-4 uppercase tracking-tighter">Treinos (Samsung Health / Google Fit)</h3>
-        
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <button
-            onClick={handleSyncGoogleFit}
-            disabled={isSyncingFit}
-            className={`flex items-center justify-center gap-2 p-3 rounded-2xl font-black text-xs transition-colors ${
-              isConnectedToFit 
-                ? 'bg-emerald-900/20 text-red-500 border border-emerald-900/30' 
-                : 'bg-red-900/20 text-red-500 border border-red-900/30'
-            }`}
-          >
-            {isSyncingFit ? (
-              <RefreshCw size={18} className="animate-spin" />
-            ) : (
-              <Activity size={18} />
-            )}
-            {isConnectedToFit ? 'Sincronizar Fit' : 'Conectar Fit'}
-          </button>
-
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isProcessing}
-            className="flex items-center justify-center gap-2 bg-[#1c1c1c] text-gray-400 border border-[#1f1f1f] p-3 rounded-2xl font-black text-xs hover:bg-[#252525] transition-colors"
-          >
-            <Upload size={18} />
-            {isProcessing ? 'Lendo...' : 'Print'}
-          </button>
-        </div>
-        <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" />
-        
-        <div className="space-y-2">
-          {workouts.length === 0 && (
-            <p className="text-center text-sm text-gray-500 py-4">Nenhum treino registrado hoje.</p>
-          )}
-          {workouts.map(w => (
-            <div key={w.id} className="bg-[#1c1c1c] rounded-2xl border border-[#1f1f1f] overflow-hidden">
-              <div 
-                className={`flex justify-between items-center p-3 ${w.details ? 'cursor-pointer hover:bg-[#222222]' : ''}`}
-                onClick={() => {
-                  if (w.details) {
-                    setExpandedWorkoutId(expandedWorkoutId === w.id ? null : w.id);
-                  }
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  {w.activity.toLowerCase().includes('corrid') || w.activity.toLowerCase().includes('caminhad') ? (
-                    <Footprints className="text-red-500" size={20} />
-                  ) : (
-                    <Dumbbell className="text-red-500" size={20} />
-                  )}
-                  <div>
-                    <p className="text-sm font-bold text-white">{w.activity}</p>
-                    <p className="text-[10px] text-gray-500">{w.date} • {w.duration}</p>
-                  </div>
+      <div className="grid lg:grid-cols-2 lg:gap-8 items-start space-y-6 lg:space-y-0">
+        <div className="space-y-6">
+          {/* META DE EXERCÍCIOS DIÁRIA */}
+          <div className="bg-[#121212] rounded-[2.5rem] shadow-xl border border-[#1f1f1f] p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-900/20 rounded-xl flex items-center justify-center text-red-500">
+                  <Dumbbell className="w-5 h-5" />
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-black text-red-500">{w.calories} kcal</span>
-                  {w.details && (
-                    <span className="text-[9px] uppercase tracking-widest text-gray-600 mt-1">
-                      {expandedWorkoutId === w.id ? 'Ocultar detalhes' : 'Ver detalhes'}
-                    </span>
-                  )}
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider font-montserrat text-white">Meta de Exercício</h3>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Diário</p>
                 </div>
               </div>
-              
-              {w.details && expandedWorkoutId === w.id && (
-                <div className="p-4 bg-[#121212] border-t border-[#1f1f1f] text-xs text-gray-300 space-y-5">
-                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-                    <div className="bg-[#1c1c1c] p-2 rounded-lg border border-[#1f1f1f]">
-                      <p className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">Ritmo</p>
-                      <p className="text-sm font-black text-white">{w.details.averagePace}</p>
+              <div className="text-right">
+                <p className="text-lg font-black text-white font-montserrat">{totalCaloriesBurned} / {exerciseGoal} kcal</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="w-full bg-[#1c1c1c] rounded-full h-3 overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-1000 ease-out rounded-full ${
+                    exerciseProgress >= 100 ? 'bg-red-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.3)]'
+                  }`}
+                  style={{ width: `${exerciseProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                  {exerciseProgress >= 100 ? 'Meta Atingida! 🔥' : `Faltam ${Math.max(0, exerciseGoal - totalCaloriesBurned)} kcal`}
+                </p>
+                <p className="text-[10px] font-black text-red-500 bg-red-900/20 px-2 py-0.5 rounded-md">
+                  {Math.round(exerciseProgress)}%
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-6">
+          {/* REGISTRO DE TREINOS */}
+          <div className="bg-[#121212] p-4 rounded-[2rem] shadow-xl border border-[#1f1f1f]">
+            <h3 className="text-lg font-bold text-white font-serif mb-4 uppercase tracking-tighter">Treinos (Samsung Health / Google Fit)</h3>
+            
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <button
+                onClick={handleSyncGoogleFit}
+                disabled={isSyncingFit}
+                className={`flex items-center justify-center gap-2 p-3 rounded-2xl font-black text-xs transition-colors ${
+                  isConnectedToFit 
+                    ? 'bg-emerald-900/20 text-red-500 border border-emerald-900/30' 
+                    : 'bg-red-900/20 text-red-500 border border-red-900/30'
+                }`}
+              >
+                {isSyncingFit ? (
+                  <RefreshCw size={18} className="animate-spin" />
+                ) : (
+                  <Activity size={18} />
+                )}
+                {isConnectedToFit ? 'Sincronizar Fit' : 'Conectar Fit'}
+              </button>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-[#1c1c1c] text-gray-400 border border-[#1f1f1f] p-3 rounded-2xl font-black text-xs hover:bg-[#252525] transition-colors"
+              >
+                <Upload size={18} />
+                {isProcessing ? 'Lendo...' : 'Print'}
+              </button>
+            </div>
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" />
+            
+            <div className="space-y-2">
+              {workouts.length === 0 && (
+                <p className="text-center text-sm text-gray-500 py-4">Nenhum treino registrado hoje.</p>
+              )}
+              {workouts.map(w => (
+                <div key={w.id} className="bg-[#1c1c1c] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+                  <div 
+                    className={`flex justify-between items-center p-3 ${w.details ? 'cursor-pointer hover:bg-[#222222]' : ''}`}
+                    onClick={() => {
+                      if (w.details) {
+                        setExpandedWorkoutId(expandedWorkoutId === w.id ? null : w.id);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      {w.activity.toLowerCase().includes('corrid') || w.activity.toLowerCase().includes('caminhad') ? (
+                        <Footprints className="text-red-500" size={20} />
+                      ) : (
+                        <Dumbbell className="text-red-500" size={20} />
+                      )}
+                      <div>
+                        <p className="text-sm font-bold text-white">{w.activity}</p>
+                        <p className="text-[10px] text-gray-500">{w.date} • {w.duration}</p>
+                      </div>
                     </div>
-                    <div className="bg-[#1c1c1c] p-2 rounded-lg border border-[#1f1f1f]">
-                      <p className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">FC Média</p>
-                      <p className="text-sm font-black text-white">{w.details.averageHeartRateBpm} <span className="text-[10px] font-medium text-gray-500">bpm</span></p>
+                    <div className="flex flex-col items-end">
+                      <span className="text-sm font-black text-red-500">{w.calories} kcal</span>
+                      {w.details && (
+                        <span className="text-[9px] uppercase tracking-widest text-gray-600 mt-1">
+                          {expandedWorkoutId === w.id ? 'Ocultar detalhes' : 'Ver detalhes'}
+                        </span>
+                      )}
                     </div>
                   </div>
+                  
+                  {w.details && expandedWorkoutId === w.id && (
+                    <div className="p-4 bg-[#121212] border-t border-[#1f1f1f] text-xs text-gray-300 space-y-5">
+                      <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                        <div className="bg-[#1c1c1c] p-2 rounded-lg border border-[#1f1f1f]">
+                          <p className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">Ritmo</p>
+                          <p className="text-sm font-black text-white">{w.details.averagePace}</p>
+                        </div>
+                        <div className="bg-[#1c1c1c] p-2 rounded-lg border border-[#1f1f1f]">
+                          <p className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">FC Média</p>
+                          <p className="text-sm font-black text-white">{w.details.averageHeartRateBpm} <span className="text-[10px] font-medium text-gray-500">bpm</span></p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>
