@@ -184,6 +184,21 @@ const App = () => {
       lbm: '72.4', realAge: '35', height: '180'
     },
     {
+      id: 11, date: '2026/04/24', time: '15:03:00',
+      weight: '102.8', weightStatus: 'Obeso', bmi: '31.7', bodyFat: '34.9', fatWeight: '35.9',
+      skeletalMuscle: '37.6', skeletalMuscleWeight: '37.6', muscleRate: '36.6', muscleWeight: '37.6',
+      water: '47.3', waterWeight: '48.6', visceralFat: '15.0', boneMass: '5.16',
+      metabolism: '1815.0', protein: '13.1', obesityLevel: '144.0', metabolicAge: '46.0',
+      lbm: '66.9', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.60', leanArmRight: '3.60', leanTrunk: '28.6', leanLegLeft: '10.21', leanLegRight: '10.31',
+      fatArmLeft: '2.8', fatArmRight: '2.9', fatTrunk: '18.2', fatLegLeft: '5.3', fatLegRight: '5.3'
+    },
+    {
       id: 6, date: '2026/04/27', time: '12:56:07',
       weight: '100.1', weightStatus: 'Obeso', bmi: '29.0', bodyFat: '30.9', fatWeight: '29.0',
       skeletalMuscle: '53.0', skeletalMuscleWeight: '34.6', muscleRate: '53.0', muscleWeight: '34.6',
@@ -223,6 +238,21 @@ const App = () => {
       thighRightPx: '71', thighLeftPx: '71', thighRightDt: '47', thighLeftDt: '48',
       calfRight: '40', calfLeft: '40', armRight: '34', armLeft: '34.5',
       forearmRight: '27', forearmLeft: '27.5'
+    },
+    {
+      id: 10, date: '2026/06/01', time: '15:12:00',
+      weight: '99.1', weightStatus: 'Obeso', bmi: '30.6', bodyFat: '34.9', fatWeight: '34.6',
+      skeletalMuscle: '36.6', skeletalMuscleWeight: '36.3', muscleRate: '36.6', muscleWeight: '36.3',
+      water: '47.3', waterWeight: '46.9', visceralFat: '15.0', boneMass: '4.95',
+      metabolism: '1763.0', protein: '12.8', obesityLevel: '139.0', metabolicAge: '46.0',
+      lbm: '64.5', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
+      fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
     }
   ]);
   
@@ -961,7 +991,7 @@ const App = () => {
     <div className="min-h-screen bg-black text-white pb-40 font-sans relative scrollbar-hide">
       {/* HEADER ESTILO DARK THEME */}
       <header className="bg-black rounded-b-[2.5rem] shadow-xl border-b border-[#1a1a1a] p-6 pt-8">
-        <div className="max-w-xl lg:max-w-7xl mx-auto">
+        <div className="w-full max-w-xl md:max-w-4xl lg:max-w-7xl xl:max-w-[1550px] mx-auto">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#1f1f1f]">
@@ -1020,13 +1050,38 @@ const App = () => {
         </div>
       </header>
 
-      <div className="max-w-xl lg:max-w-7xl mx-auto space-y-4 pt-4 px-3">
+      <div className="w-full max-w-xl md:max-w-4xl lg:max-w-7xl xl:max-w-[1550px] mx-auto space-y-6 pt-4 px-3 md:px-4">
         {activeTab === 'exercicios' && <ExerciseTracker currentUser={currentUser} />}
         {activeTab === 'poviztra' && <PoviztraControl currentUser={currentUser} />}
         {activeTab === 'saude' && (
-          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-24 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24 items-start">
             <div className="space-y-6">
               <WeightMetrics currentUser={currentUser} />
+              
+              {/* SEÇÃO DE MEDICAÇÕES (DESLOCADA PARA COLUNA DE PESO) */}
+              <div className="bg-[#121212] border border-[#1f1f1f] rounded-[2rem] p-6 shadow-xl">
+                <h3 className="text-xs font-black uppercase tracking-wider font-montserrat mb-4 text-white">Medicações e Vitaminas</h3>
+                <div className="space-y-3">
+                  {[
+                    { name: 'Bup (Bupropiona) 150mg XL', dosage: '150mg', frequency: '2x ao dia' },
+                    { name: 'Topiramato', dosage: '100mg', frequency: '2x ao dia' },
+                    { name: 'Sertralina', dosage: '50mg', frequency: '2x ao dia' },
+                    { name: 'Venvanse (Genérico)', dosage: '30mg', frequency: '1x ao dia' },
+                    { name: 'Vitaminas Bariátrica', dosage: '-', frequency: '2x ao dia' },
+                  ].map((med, i) => (
+                    <div key={i} className="flex justify-between items-center p-3 bg-black/40 rounded-xl border border-[#222]">
+                      <div>
+                        <p className="text-xs font-bold text-white">{med.name}</p>
+                        <p className="text-[10px] text-gray-500 font-bold">{med.dosage}</p>
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-wider text-red-500 bg-red-950/30 border border-red-500/20 px-2.5 py-0.5 rounded-md shrink-0">{med.frequency}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
               <GlicemiaMetrics currentUser={currentUser} />
             </div>
             
@@ -1189,11 +1244,11 @@ const App = () => {
                 const measures = healthMeasurements.filter(m => m.period === period);
                 if (measures.length === 0) return null;
                 return (
-                  <div key={period} className="bg-white rounded-[2rem] p-6 shadow-sm border border-[#333]">
-                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">{period}</h3>
+                  <div key={period} className="bg-[#121212] rounded-[2rem] p-6 border border-[#1f1f1f] shadow-xl mt-6">
+                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">{period}</h3>
                     <div className="space-y-3">
                       {measures.map(m => (
-                        <div key={m.id} className="flex items-center justify-between p-4 bg-[#1c1c1c] rounded-2xl border border-[#222]">
+                        <div key={m.id} className="flex items-center justify-between p-4 bg-black/40 rounded-2xl border border-[#222]">
                           <div className="flex items-center gap-4">
                             <span className="text-xs font-black text-gray-400">{m.time}</span>
                             <div className="flex items-center gap-2">
@@ -1218,28 +1273,6 @@ const App = () => {
                   </div>
                 );
               })}
-            </div>
-
-            {/* SEÇÃO DE MEDICAÇÕES */}
-            <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6 mt-6">
-              <h3 className="text-sm font-black uppercase tracking-wider font-montserrat mb-4">Medicações e Vitaminas</h3>
-              <div className="space-y-3">
-                {[
-                  { name: 'Bup (Bupropiona) 150mg XL', dosage: '150mg', frequency: '2x ao dia' },
-                  { name: 'Topiramato', dosage: '100mg', frequency: '2x ao dia' },
-                  { name: 'Sertralina', dosage: '50mg', frequency: '2x ao dia' },
-                  { name: 'Venvanse (Genérico)', dosage: '30mg', frequency: '1x ao dia' },
-                  { name: 'Vitaminas Bariátrica', dosage: '-', frequency: '2x ao dia' },
-                ].map((med, i) => (
-                  <div key={i} className="flex justify-between items-center p-3 bg-[#1c1c1c] rounded-xl border border-[#222]">
-                    <div>
-                      <p className="text-xs font-bold text-white">{med.name}</p>
-                      <p className="text-[10px] text-gray-400">{med.dosage}</p>
-                    </div>
-                    <span className="text-[10px] font-black text-red-500 bg-red-900/10 px-2 py-1 rounded-lg">{med.frequency}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
           </div>
@@ -1466,7 +1499,7 @@ const App = () => {
 
           <div className="space-y-6">
             {/* SEÇÃO DE AFERIÇÕES DE SAÚDE */}
-            <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6 relative mt-6">
+            <div className="bg-[#121212] rounded-[2rem] shadow-lg border border-[#1f1f1f] p-6 relative mt-6 animate-in fade-in duration-300">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500">
@@ -1488,7 +1521,7 @@ const App = () => {
                     <motion.div 
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-[#222] p-3 z-[100]"
+                      className="absolute right-0 mt-2 w-56 bg-[#1a1a1a] rounded-2xl shadow-2xl border border-[#2d2d2d] p-3 z-[100]"
                     >
                       {!healthInputType ? (
                         <div className="space-y-1">
@@ -1647,8 +1680,8 @@ const App = () => {
                 return (
                   <div 
                     key={meal.id}
-                    className={`bg-white rounded-[2rem] shadow-sm border transition-all overflow-hidden ${
-                      isConfirmed ? 'border-red-900/30 bg-red-900/10/10' : 'border-[#333]'
+                    className={`bg-[#121212] rounded-[2rem] shadow-sm border transition-all overflow-hidden ${
+                      isConfirmed ? 'border-red-900/40 bg-red-900/5' : 'border-[#1f1f1f]'
                     }`}
                   >
                     <div className="p-5 flex items-center gap-4">
@@ -1888,7 +1921,7 @@ const App = () => {
         {activeTab === 'historico' && (
           <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
             <div className="space-y-6">
-              <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6">
+              <div className="bg-[#121212] rounded-[2rem] shadow-lg border border-[#1f1f1f] p-6 animate-in fade-in duration-300">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Resumo da Semana</h2>
                   <TrendingDown className="w-4 h-4 text-red-500" />
@@ -1908,7 +1941,7 @@ const App = () => {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white rounded-[2rem] shadow-sm border border-[#333] p-6">
+              <div className="bg-[#121212] rounded-[2rem] shadow-lg border border-[#1f1f1f] p-6 animate-in fade-in duration-300">
                 <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Últimos Registros</h2>
                 <div className="space-y-6">
                   {(Object.entries(confirmedMeals) as [string, MealData][]).reverse().map(([id, meal]) => (
@@ -1938,7 +1971,7 @@ const App = () => {
         {activeTab === 'receitas' && (
           <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
             {receitas.map((recipe) => (
-              <div key={recipe.id} className="bg-white rounded-[2.5rem] shadow-sm border border-[#333] overflow-hidden flex flex-col h-full">
+              <div key={recipe.id} className="bg-[#121212] rounded-[2.5rem] shadow-lg border border-[#1f1f1f] overflow-hidden flex flex-col h-full">
                 <div className="p-8 flex-1">
                   <div className="flex justify-between items-start mb-6">
                     <h3 className="text-xl font-black text-white font-montserrat leading-tight max-w-[70%]">

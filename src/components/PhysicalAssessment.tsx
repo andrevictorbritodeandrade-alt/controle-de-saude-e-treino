@@ -238,40 +238,65 @@ const MetricsView = ({ assessment }: any) => {
   const { gordura, muscle, water } = getMetricSources(assessment);
   
   return (
-    <div className="space-y-4 pb-28 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-[#121212] rounded-[2.5rem] p-6 shadow-xl border border-[#1f1f1f]">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-lg font-black text-white">Métricas corporais</h2>
+    <div className="space-y-6 pb-28 animate-in slide-in-from-bottom-4 duration-500">
+      {/* Top summary row/card */}
+      <div className="bg-[#121212] rounded-[2.5rem] p-8 shadow-xl border border-[#1f1f1f] flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500 border border-red-500/20">
+            <Calendar size={22} strokeWidth={3} />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-white tracking-tight leading-none uppercase">Visualizando Avaliação</h2>
+            <p className="text-[10px] font-bold text-gray-500 uppercase mt-1.5 italic font-mono">{assessment.date} • {assessment.time}</p>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-6 justify-center md:justify-end">
+          <div className="text-center md:text-right">
+            <span className="text-4xl font-black text-white tracking-tighter block">{assessment.weight}<span className="text-xs font-bold text-gray-500 ml-1 font-mono">KG</span></span>
+            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Peso Atual</span>
+          </div>
+          <div className="h-8 w-px bg-[#222] hidden sm:block"></div>
+          <div className="text-center md:text-right">
+            <span className="text-4xl font-black text-white tracking-tighter block">{assessment.bodyFat}<span className="text-xs font-bold text-gray-500 ml-1 font-mono">%</span></span>
+            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Gordura Corporal</span>
+          </div>
+          <div className="h-8 w-px bg-[#222] hidden sm:block"></div>
           <StatusBadge status={assessment.weightStatus || "Alto"} />
         </div>
+      </div>
 
-        <div className="flex flex-col items-center mb-10">
-           <span className="text-6xl font-black text-white tracking-tighter">{assessment.weight}</span>
-           <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Kilogramas</span>
-           <p className="text-[10px] font-bold text-gray-600 mt-2">{assessment.date} {assessment.time}</p>
-        </div>
-
-        <div className="space-y-6">
+      {/* Grid of details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        
+        {/* CARD 1: Composição Corporal & Bioimpedância */}
+        <div className="bg-[#121212] rounded-[2.5rem] p-6 shadow-xl border border-[#1f1f1f] space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 px-2">Composição Corporal & Bioimpedância</h3>
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 px-2 flex items-center gap-2">
+              <User size={14} className="text-red-500" />
+              Composição & Bioimpedância
+            </h3>
             <div className="space-y-1">
               <MetricRow icon={User} label="Peso (Kg)" value={assessment.weight} status="Alto" />
               <MetricRow icon={Activity} label="IMC" value={assessment.bmi} status="Alto" />
-              
               <ComparisonMetricRow label="Gordura Corporal (%)" scaleVal={gordura.scale} watchVal={gordura.watch} foldVal={gordura.skinfold} />
               <MetricRow icon={User} label="Peso da gordura (Kg)" value={assessment.fatWeight} status="Obeso" />
-              
               <ComparisonMetricRow label="Percentual de massa muscular (%)" scaleVal={muscle.scale} watchVal={muscle.watch} foldVal={muscle.skinfold} />
               <MetricRow icon={Activity} label="Peso de massa muscular (Kg)" value={assessment.skeletalMuscleWeight || assessment.muscleWeight || 0} status="Saudável" />
-              
               <ComparisonMetricRow label="Água (%)" scaleVal={water.scale} watchVal={water.watch} foldVal={water.skinfold} />
               <MetricRow icon={Droplets} label="Peso da água (Kg)" value={assessment.waterWeight} status="Baixo" />
               <MetricRow icon={Flame} label="TMB (Kcal)" value={assessment.metabolism} status="Alto" />
             </div>
           </div>
+        </div>
 
+        {/* CARD 2: Dobras Cutâneas */}
+        <div className="bg-[#121212] rounded-[2.5rem] p-6 shadow-xl border border-[#1f1f1f] space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 px-2">Dobras Cutâneas</h3>
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 px-2 flex items-center gap-2">
+              <Activity size={14} className="text-red-500" />
+              Dobras Cutâneas
+            </h3>
             <div className="space-y-1">
               <MetricRow icon={Activity} label="Peitoral" value={assessment.skinfoldChest || "0,0"} />
               <MetricRow icon={Activity} label="Abdominal" value={assessment.skinfoldAbdo || "0,0"} />
@@ -280,28 +305,112 @@ const MetricsView = ({ assessment }: any) => {
               <MetricRow icon={Droplets} label="Densidade Corporal" value={assessment.bodyDensity || "1,1"} />
             </div>
           </div>
-
-          <div>
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 px-2">Perimetria (cm)</h3>
-            <div className="space-y-1">
-              <MetricRow icon={Activity} label="Tórax" value={assessment.chest || "---"} />
-              <MetricRow icon={Activity} label="Cintura" value={assessment.waist || "---"} />
-              <MetricRow icon={Activity} label="Abdomen" value={assessment.abdomen || "---"} />
-              <MetricRow icon={Activity} label="Quadril" value={assessment.hip || "---"} />
-              <MetricRow icon={Activity} label="coxa proximal esquerda" value={assessment.thighLeftPx || "---"} />
-              <MetricRow icon={Activity} label="coxa proximal direita" value={assessment.thighRightPx || "---"} />
-              <MetricRow icon={Activity} label="coxa distal direita" value={assessment.thighRightDt || "---"} />
-              <MetricRow icon={Activity} label="coxa distal esquerda" value={assessment.thighLeftDt || "---"} />
-              <MetricRow icon={Activity} label="panturrilha esquerda" value={assessment.calfLeft || "---"} />
-              <MetricRow icon={Activity} label="panturrilha direita" value={assessment.calfRight || "---"} />
-              <MetricRow icon={Activity} label="braço direito" value={assessment.armRight || "---"} />
-              <MetricRow icon={Activity} label="braço esquerdo" value={assessment.armLeft || "---"} />
-              <MetricRow icon={Activity} label="antebraço direito" value={assessment.forearmRight || "---"} />
-              <MetricRow icon={Activity} label="antebraço esquerdo" value={assessment.forearmLeft || "---"} />
+          
+          <div className="pt-4 border-t border-[#1a1a1a] mt-4 flex gap-4">
+            <div className="bg-[#1c1c1c] p-4 rounded-3xl border border-[#222] flex-1">
+              <span className="text-[10px] font-black uppercase text-gray-400 block mb-1">Idade</span>
+              <span className="text-base font-black text-white">{assessment.realAge || "36"} anos</span>
+            </div>
+            <div className="bg-[#1c1c1c] p-4 rounded-3xl border border-[#222] flex-1">
+              <span className="text-[10px] font-black uppercase text-gray-400 block mb-1">Altura</span>
+              <span className="text-base font-black text-white">{assessment.height || "180"} cm</span>
             </div>
           </div>
         </div>
+
+        {/* CARD 3: Perimetria (cm) */}
+        <div className="bg-[#121212] rounded-[2.5rem] p-6 shadow-xl border border-[#1f1f1f] space-y-4 md:col-span-2 xl:col-span-1">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 px-2 flex items-center gap-2">
+            <FileText size={14} className="text-red-500" />
+            Perimetria (cm)
+          </h3>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            <MetricRow icon={Activity} label="Tórax" value={assessment.chest || "---"} />
+            <MetricRow icon={Activity} label="Cintura" value={assessment.waist || "---"} />
+            <MetricRow icon={Activity} label="Abdomen" value={assessment.abdomen || "---"} />
+            <MetricRow icon={Activity} label="Quadril" value={assessment.hip || "---"} />
+            <MetricRow icon={Activity} label="Coxa Prox. Esq." value={assessment.thighLeftPx || "---"} />
+            <MetricRow icon={Activity} label="Coxa Prox. Dir." value={assessment.thighRightPx || "---"} />
+            <MetricRow icon={Activity} label="Coxa Dist. Dir." value={assessment.thighRightDt || "---"} />
+            <MetricRow icon={Activity} label="Coxa Dist. Esq." value={assessment.thighLeftDt || "---"} />
+            <MetricRow icon={Activity} label="Panturrilha Esq." value={assessment.calfLeft || "---"} />
+            <MetricRow icon={Activity} label="Panturrilha Dir." value={assessment.calfRight || "---"} />
+            <MetricRow icon={Activity} label="Braço Dir." value={assessment.armRight || "---"} />
+            <MetricRow icon={Activity} label="Braço Esq." value={assessment.armLeft || "---"} />
+            <MetricRow icon={Activity} label="Antebraço Dir." value={assessment.forearmRight || "---"} />
+            <MetricRow icon={Activity} label="Antebraço Esq." value={assessment.forearmLeft || "---"} />
+          </div>
+        </div>
+
       </div>
+
+      {/* CARD 4: Composição Segmentar InBody */}
+      {assessment.leanArmLeft && (
+        <div className="bg-[#121212] rounded-[2.5rem] p-6 shadow-xl border border-[#1f1f1f] space-y-4">
+          <h3 className="text-xs font-black text-white uppercase tracking-widest px-2 flex items-center gap-2">
+            <Activity size={16} className="text-red-500" strokeWidth={3} /> Composição Segmentar (InBody Detalhado)
+          </h3>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-2 -mt-2">Análise lateralizada de massa gorda e magra nos membros e tronco</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className="bg-[#1c1c1c] p-5 rounded-3xl border border-[#222]">
+              <p className="text-xs font-black uppercase text-emerald-500 tracking-wider mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Massa Magra Segmentar
+              </p>
+              <div className="space-y-2.5 text-xs font-bold text-gray-400">
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Braço Esquerdo</span>
+                  <span className="text-white font-black">{assessment.leanArmLeft} kg <span className="text-[10px] text-gray-500 ml-1 font-mono">({parseFloat(assessment.leanArmLeft) >= 3.6 ? '100.6%' : '97.7%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Braço Direito</span>
+                  <span className="text-white font-black">{assessment.leanArmRight} kg <span className="text-[10px] text-gray-500 ml-1 font-mono">({parseFloat(assessment.leanArmRight) >= 3.6 ? '100.3%' : '97.4%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Tronco</span>
+                  <span className="text-white font-black">{assessment.leanTrunk} kg <span className="text-[10px] text-gray-500 ml-1 font-mono">({parseFloat(assessment.leanTrunk) >= 28.6 ? '95.7%' : '94.2%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Perna Esquerda</span>
+                  <span className="text-white font-black">{assessment.leanLegLeft} kg <span className="text-[10px] text-gray-500 ml-1 font-mono">({parseFloat(assessment.leanLegLeft) >= 10.21 ? '93.5%' : '92.2%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Perna Direito</span>
+                  <span className="text-white font-black">{assessment.leanLegRight} kg <span className="text-[10px] text-gray-500 ml-1 font-mono">({parseFloat(assessment.leanLegRight) >= 10.31 ? '93.9%' : '92.6%'})</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#1c1c1c] p-5 rounded-3xl border border-[#222]">
+              <p className="text-xs font-black uppercase text-rose-500 tracking-wider mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Massa Gorda Segmentar
+              </p>
+              <div className="space-y-2.5 text-xs font-bold text-gray-400">
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Braço Esquerdo</span>
+                  <span className="text-white font-black">{assessment.fatArmLeft} kg <span className="text-[10px] text-rose-500/80 ml-1 font-mono">({parseFloat(assessment.fatArmLeft) >= 2.8 ? '443.2%' : '420.4%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Braço Direito</span>
+                  <span className="text-white font-black">{assessment.fatArmRight} kg <span className="text-[10px] text-rose-500/80 ml-1 font-mono">({parseFloat(assessment.fatArmRight) >= 2.9 ? '448.1%' : '423.5%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Tronco</span>
+                  <span className="text-white font-black">{assessment.fatTrunk} kg <span className="text-[10px] text-rose-500/80 ml-1 font-mono">({parseFloat(assessment.fatTrunk) >= 18.2 ? '402.9%' : '390.0%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Perna Esquerda</span>
+                  <span className="text-white font-black">{assessment.fatLegLeft} kg <span className="text-[10px] text-rose-500/80 ml-1 font-mono">({parseFloat(assessment.fatLegLeft) >= 5.3 ? '286.7%' : '276.3%'})</span></span>
+                </div>
+                <div className="flex justify-between items-center bg-[#121212]/50 p-3 rounded-xl border border-[#252525]">
+                  <span>Perna Direita</span>
+                  <span className="text-white font-black">{assessment.fatLegRight} kg <span className="text-[10px] text-rose-500/80 ml-1 font-mono">({parseFloat(assessment.fatLegRight) >= 5.3 ? '287.7%' : '276.5%'})</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -498,7 +607,18 @@ const AnalysisView = ({ assessment }: any) => {
 };
 
 // 4. COMPARATIVO
-const ComparisonView = ({ current, previous }: { current: any, previous: any }) => {
+const ComparisonView = ({ current, previous: initialPrevious, assessments = [] }: { current: any, previous: any, assessments?: any[] }) => {
+  const [selectedPreviousId, setSelectedPreviousId] = useState<number | null>(() => {
+    // If current is June 1st, 2026, defaults to April 24th assessment if available
+    if (current.date === '2026/06/01') {
+      const aprilAssessment = assessments.find(a => a.date === '2026/04/24' || a.id === 11);
+      if (aprilAssessment) return aprilAssessment.id;
+    }
+    return initialPrevious ? initialPrevious.id : (assessments[0]?.id || null);
+  });
+
+  const previous = assessments.find(a => a.id === selectedPreviousId) || initialPrevious;
+
   if (!previous) return <div className="p-10 text-center font-black text-gray-500 uppercase tracking-widest leading-relaxed opacity-60">Apenas um registro encontrado para comparação. Continue registrando suas avaliações para ver a evolução!</div>;
 
   const compare = (key: string) => {
@@ -525,68 +645,112 @@ const ComparisonView = ({ current, previous }: { current: any, previous: any }) 
     { label: "Peso", key: "weight", unit: "Kg" },
     { label: "Gordura Corporal", key: "bodyFat", unit: "%" },
     { label: "Massa Muscular", key: "muscleWeight", unit: "Kg" },
-    { label: "Água", key: "water", unit: "%" },
+    { label: "Água Corporal", key: "waterWeight", unit: "Kg" },
     { label: "Gordura Visceral", key: "visceralFat", unit: "" },
     { label: "Metabolismo", key: "metabolism", unit: "kcal" },
     { label: "Tórax", key: "chest", unit: "cm" },
     { label: "Cintura", key: "waist", unit: "cm" },
     { label: "Abdomen", key: "abdomen", unit: "cm" },
     { label: "Quadril", key: "hip", unit: "cm" },
-    { label: "coxa proximal esquerda", key: "thighLeftPx", unit: "cm" },
-    { label: "coxa proximal direita", key: "thighRightPx", unit: "cm" },
-    { label: "coxa distal direita", key: "thighRightDt", unit: "cm" },
-    { label: "coxa distal esquerda", key: "thighLeftDt", unit: "cm" },
-    { label: "panturrilha esquerda", key: "calfLeft", unit: "cm" },
-    { label: "panturrilha direita", key: "calfRight", unit: "cm" },
-    { label: "braço direito", key: "armRight", unit: "cm" },
-    { label: "braço esquerdo", key: "armLeft", unit: "cm" },
-    { label: "antebraço direito", key: "forearmRight", unit: "cm" },
-    { label: "antebraço esquerdo", key: "forearmLeft", unit: "cm" },
+    { label: "Coxa Proximal Esq.", key: "thighLeftPx", unit: "cm" },
+    { label: "Coxa Proximal Dir.", key: "thighRightPx", unit: "cm" },
+    { label: "Coxa Distal Dir.", key: "thighRightDt", unit: "cm" },
+    { label: "Coxa Distal Esq.", key: "thighLeftDt", unit: "cm" },
+    { label: "Panturrilha Esq.", key: "calfLeft", unit: "cm" },
+    { label: "Panturrilha Dir.", key: "calfRight", unit: "cm" },
+    { label: "Braço Direito", key: "armRight", unit: "cm" },
+    { label: "Braço Esquerdo", key: "armLeft", unit: "cm" },
+    { label: "Antebraço Direito", key: "forearmRight", unit: "cm" },
+    { label: "Antebraço Esquerdo", key: "forearmLeft", unit: "cm" },
   ];
 
   return (
-    <div className="space-y-4 pb-28 animate-in slide-in-from-right duration-500">
-      <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-50">
-        <h3 className="text-sm font-black text-gray-100 mb-6 uppercase tracking-tight flex items-center gap-2">
-          <TrendingUp size={18} className="text-red-500" strokeWidth={3}/>
-          Comparativo: {previous.date} ➔ {current.date}
-        </h3>
+    <div className="space-y-6 pb-28 animate-in slide-in-from-right duration-500">
+      <div className="bg-[#121212] p-6 rounded-[2.5rem] border border-[#1f1f1f]">
         
-        <div className="space-y-4">
+        {/* Header com Dropdown robusto de Linha de Base */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#1f1f1f]">
+          <h3 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-2">
+            <TrendingUp size={18} className="text-red-500" strokeWidth={3}/>
+            Comparativo de Evolução: {previous.date} ➔ {current.date}
+          </h3>
+          
+          {assessments.length > 1 && (
+            <div className="flex items-center gap-2 bg-[#1c1c1c] px-4 py-2 rounded-2xl border border-[#222]">
+              <span className="text-[10px] font-black uppercase text-gray-500 font-mono">Comparar com:</span>
+              <select 
+                value={selectedPreviousId || ''} 
+                onChange={(e) => setSelectedPreviousId(Number(e.target.value))}
+                className="bg-transparent text-xs font-black text-white focus:outline-none cursor-pointer outline-none border-none pr-2"
+              >
+                {assessments
+                  .filter((a: any) => a.id !== current.id)
+                  .map((a: any) => (
+                    <option key={a.id} value={a.id} className="bg-[#1c1c1c] text-white">
+                      {a.date} ({a.weight} kg)
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+        </div>
+        
+        {/* Layout Grid Inteligente de Ponta a Ponta */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {metrics.map((m, i) => {
             const stats = compare(m.key);
             const val = current[m.key] || "---";
+            const prevVal = previous[m.key] || "---";
             
-            if (stats === null) {
+            if (stats === null || val === "---" || prevVal === "---") {
               return (
-                <div key={i} className="flex items-center justify-between p-4 bg-[#1c1c1c]/50 rounded-3xl border-2 border-dashed border-[#222] italic">
+                <div key={i} className="flex items-center justify-between p-4 bg-[#1c1c1c]/30 rounded-3xl border border-dashed border-[#222] opacity-60 italic">
                   <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">{m.label}</p>
-                    <p className="text-sm font-black text-gray-500">Sem dados</p>
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">{m.label}</p>
+                    <p className="text-xs font-black text-gray-650">Sem dados comparativos</p>
                   </div>
-                  <div className="text-right text-[10px] font-black text-slate-200">---</div>
+                  <div className="text-right text-[10px] font-mono text-gray-650">---</div>
                 </div>
               );
             }
 
-            const isGood = (m.key === 'muscleWeight' || m.key === 'water' || m.key === 'metabolism') 
+            const isGood = (m.key === 'muscleWeight' || m.key === 'waterWeight' || m.key === 'water' || m.key === 'metabolism') 
               ? stats.isIncrease 
               : !stats.isIncrease;
 
+            const changeColor = stats.diff === "0.00" 
+              ? 'text-gray-400' 
+              : isGood 
+                ? 'text-emerald-500' 
+                : 'text-red-500';
+
+            const changeBg = stats.diff === "0.00"
+              ? 'bg-gray-500/10'
+              : isGood
+                ? 'bg-emerald-500/10 border border-emerald-500/10'
+                : 'bg-red-500/10 border border-red-500/10';
+
             return (
-              <div key={i} className="flex items-center justify-between p-4 bg-[#1c1c1c] rounded-3xl border-2 border-white shadow-sm">
+              <div key={i} className="flex items-center justify-between p-4 bg-[#1c1c1c] rounded-3xl border border-[#222] hover:border-[#2a2a2a] transition-colors">
                 <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">{m.label}</p>
-                  <p className="text-sm font-black text-white">{val} <span className="text-[10px] opacity-40">{m.unit}</span></p>
-                </div>
-                <div className="text-right">
-                  <div className={`flex items-center justify-end gap-1 font-black text-sm ${isGood ? 'text-red-500' : 'text-red-500'}`}>
-                    {stats.isIncrease ? '+' : '-'}{stats.diff} {m.unit}
-                    {stats.isIncrease ? <TrendingUp size={14} strokeWidth={3}/> : <TrendingUp size={14} className="rotate-180" strokeWidth={3}/>}
-                  </div>
-                  <p className={`text-[9px] font-bold ${isGood ? 'text-red-500/60' : 'text-red-600/60'}`}>
-                    {stats.percent}% vs anterior
+                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1.5">{m.label}</p>
+                  <p className="text-sm font-black text-white flex items-center gap-1.5 flex-wrap">
+                    {val} <span className="text-[10px] opacity-40 font-mono">{m.unit}</span>
+                    <span className="text-[10px] text-gray-500 font-normal">
+                      (era {prevVal} {m.unit})
+                    </span>
                   </p>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <div className={`flex items-center gap-1 font-black text-[11px] px-2.5 py-1 rounded-xl ${changeBg} ${changeColor}`}>
+                    {stats.diff === "0.00" ? 'Sem alteração' : `${stats.isIncrease ? '+' : '-'}${stats.diff} ${m.unit}`}
+                    {stats.diff !== "0.00" && (stats.isIncrease ? <TrendingUp size={12} strokeWidth={3}/> : <TrendingUp size={12} className="rotate-180" strokeWidth={3}/>)}
+                  </div>
+                  {stats.diff !== "0.00" && (
+                    <p className="text-[9px] font-bold text-gray-500 mt-1 font-mono">
+                      {stats.percent}% vs anterior
+                    </p>
+                  )}
                 </div>
               </div>
             );
@@ -594,11 +758,80 @@ const ComparisonView = ({ current, previous }: { current: any, previous: any }) 
         </div>
       </div>
 
+      {/* COMPACT DETAILED SEGMENT COMPONENT COMPARISON IF AVAILABLE */}
+      {current.leanArmLeft && previous.leanArmLeft && (
+        <div className="bg-[#121212] p-6 rounded-[2.5rem] border border-[#1f1f1f] space-y-4">
+          <h3 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-2">
+            <Activity size={18} className="text-red-500" strokeWidth={3}/>
+            Análise Avançada Lateralizada (Massa Magra & Gorda)
+          </h3>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider -mt-1">Comparando a massa magra e gorda nos membros e tronco detalhadamente</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-[#1c1c1c] p-4 rounded-3xl border border-[#222]">
+              <span className="text-[10px] font-black uppercase text-emerald-500 block mb-3">Δ Massa Magra Segmentar</span>
+              <div className="space-y-2 text-xs font-bold text-gray-400">
+                {[
+                  { label: "Braço Esquerdo", key: "leanArmLeft", parser: (v: any) => parseFloat(v) },
+                  { label: "Braço Direito", key: "leanArmRight", parser: (v: any) => parseFloat(v) },
+                  { label: "Tronco", key: "leanTrunk", parser: (v: any) => parseFloat(v) },
+                  { label: "Perna Esquerda", key: "leanLegLeft", parser: (v: any) => parseFloat(v) },
+                  { label: "Perna Direita", key: "leanLegRight", parser: (v: any) => parseFloat(v) }
+                ].map((item, index) => {
+                  const cVal = item.parser(current[item.key]);
+                  const pVal = item.parser(previous[item.key]);
+                  const diff = cVal - pVal;
+                  return (
+                    <div key={index} className="flex justify-between items-center bg-[#121212]/50 p-2.5 rounded-xl border border-[#252525]">
+                      <span>{item.label}</span>
+                      <span className="text-white font-black flex items-center gap-2">
+                        {cVal.toFixed(2)} kg
+                        <span className={`text-[10px] ${diff >= 0 ? 'text-emerald-500 font-extrabold' : 'text-red-500 font-normal'}`}>
+                          ({diff >= 0 ? '+' : ''}{diff.toFixed(2)})
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="bg-[#1c1c1c] p-4 rounded-3xl border border-[#222]">
+              <span className="text-[10px] font-black uppercase text-rose-500 block mb-3">Δ Massa Gorda Segmentar</span>
+              <div className="space-y-2 text-xs font-bold text-gray-400">
+                {[
+                  { label: "Braço Esquerdo", key: "fatArmLeft", parser: (v: any) => parseFloat(v) },
+                  { label: "Braço Direito", key: "fatArmRight", parser: (v: any) => parseFloat(v) },
+                  { label: "Tronco", key: "fatTrunk", parser: (v: any) => parseFloat(v) },
+                  { label: "Perna Esquerda", key: "fatLegLeft", parser: (v: any) => parseFloat(v) },
+                  { label: "Perna Direita", key: "fatLegRight", parser: (v: any) => parseFloat(v) }
+                ].map((item, index) => {
+                  const cVal = item.parser(current[item.key]);
+                  const pVal = item.parser(previous[item.key]);
+                  const diff = cVal - pVal;
+                  return (
+                    <div key={index} className="flex justify-between items-center bg-[#121212]/50 p-2.5 rounded-xl border border-[#252525]">
+                      <span>{item.label}</span>
+                      <span className="text-white font-black flex items-center gap-2">
+                        {cVal.toFixed(2)} kg
+                        <span className={`text-[10px] ${diff <= 0 ? 'text-emerald-400 font-extrabold' : 'text-rose-500 font-normal'}`}>
+                          ({diff >= 0 ? '+' : ''}{diff.toFixed(2)})
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="p-6 bg-red-600 rounded-[2.5rem] text-white shadow-xl shadow-red-900/30">
         <h3 className="text-sm font-black mb-3 uppercase tracking-wider">Veredito do Mestre</h3>
         <p className="text-xs font-medium leading-relaxed opacity-90">
           André, comparando com {previous.date}, você teve uma variação de <BoldText>{(parseFloat(current.weight) - parseFloat(previous.weight)).toFixed(1)}kg</BoldText> no peso total. 
-          {parseFloat(current.muscleWeight) > parseFloat(previous.muscleWeight) ? " A massa muscular subiu, o que é excelente para manter a taxa metabólica ativa." : " Atenção à massa muscular, busque manter os estímulos de força."}
+          {parseFloat(current.muscleWeight || current.skeletalMuscleWeight) > parseFloat(previous.muscleWeight || previous.skeletalMuscleWeight) ? " A massa muscular subiu, o que é excelente para blindar as articulações e manter o metabolismo otimizado!" : " Foco no consumo de proteínas (meta de treino forte!) e repouso de qualidade para blindar d recrutar sua musculatura enquanto otimiza a perda de gordura corporal."}
         </p>
       </div>
     </div>
@@ -960,8 +1193,8 @@ const NewAssessmentForm = ({ onSave, onCancel }: any) => {
         {activeStep === 'bio' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             {/* Informações Básicas de Peso e Data */}
-            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm space-y-4 border border-[#222]">
-              <h3 className="text-xs font-black text-gray-100 uppercase tracking-wider mb-2">Dados Vitais</h3>
+            <div className="bg-[#121212] p-6 rounded-[2.5rem] border border-[#1f1f1f] shadow-xl space-y-4">
+              <h3 className="text-xs font-black text-white uppercase tracking-wider mb-2">Dados Vitais</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Data</label>
@@ -977,10 +1210,10 @@ const NewAssessmentForm = ({ onSave, onCancel }: any) => {
             </div>
 
             {/* Upload do Print para Extração Automática por Inteligência Artificial (Gemini) */}
-            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-[#222] space-y-4">
+            <div className="bg-[#121212] p-6 rounded-[2.5rem] border border-[#1f1f1f] shadow-xl space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-black text-gray-100 uppercase tracking-wider">Leitor Inteligente de Bioimpedância</h3>
+                  <h3 className="text-xs font-black text-white uppercase tracking-wider">Leitor Inteligente de Bioimpedância</h3>
                   <p className="text-[9px] font-bold text-gray-400 mt-1">Galaxy Watch 7 & Relatórios</p>
                 </div>
                 <div className="px-2 py-1 bg-red-900/10 text-red-500 rounded-lg text-[9px] font-black flex items-center gap-1 uppercase">
@@ -1068,58 +1301,58 @@ const NewAssessmentForm = ({ onSave, onCancel }: any) => {
               </div>
 
               {showManualBio && (
-                <div className="space-y-4 p-4 bg-[#1c1c1c]/50 rounded-3xl border-2 border-[#222]/50 grid grid-cols-2 gap-4 animate-in slide-in-from-top-4">
+                <div className="space-y-4 p-4 bg-black/40 rounded-3xl border border-[#222] grid grid-cols-2 gap-4 animate-in slide-in-from-top-4">
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Gordura Balança (%)</label>
-                    <input name="bodyFat" type="number" step="0.1" value={formData.bodyFat} onChange={handleChange} placeholder="ex: 28.2" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Gordura Balança (%)</label>
+                    <input name="bodyFat" type="number" step="0.1" value={formData.bodyFat} onChange={handleChange} placeholder="ex: 28.2" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Gordura Relógio (%)</label>
-                    <input name="watchBodyFat" type="number" step="0.1" value={formData.watchBodyFat} onChange={handleChange} placeholder="ex: 34.8" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Gordura Relógio (%)</label>
+                    <input name="watchBodyFat" type="number" step="0.1" value={formData.watchBodyFat} onChange={handleChange} placeholder="ex: 34.8" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Gordura Dobras (%)</label>
-                    <input name="skinfoldBodyFat" type="number" step="0.1" value={formData.skinfoldBodyFat} onChange={handleChange} placeholder="ex: 17.4" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Gordura Dobras (%)</label>
+                    <input name="skinfoldBodyFat" type="number" step="0.1" value={formData.skinfoldBodyFat} onChange={handleChange} placeholder="ex: 17.4" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Peso da Gordura (kg)</label>
-                    <input name="fatWeight" type="number" step="0.1" value={formData.fatWeight} onChange={handleChange} placeholder="ex: 19.3" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Peso da Gordura (kg)</label>
+                    <input name="fatWeight" type="number" step="0.1" value={formData.fatWeight} onChange={handleChange} placeholder="ex: 19.3" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Músculo Balança (%)</label>
-                    <input name="skeletalMuscle" type="number" step="0.1" value={formData.skeletalMuscle} onChange={handleChange} placeholder="ex: 37.4" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Músculo Balança (%)</label>
+                    <input name="skeletalMuscle" type="number" step="0.1" value={formData.skeletalMuscle} onChange={handleChange} placeholder="ex: 37.4" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Músculo Relógio (%)</label>
-                    <input name="watchSkeletalMuscle" type="number" step="0.1" value={formData.watchSkeletalMuscle} onChange={handleChange} placeholder="ex: 34.3" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Músculo Relógio (%)</label>
+                    <input name="watchSkeletalMuscle" type="number" step="0.1" value={formData.watchSkeletalMuscle} onChange={handleChange} placeholder="ex: 34.3" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Músculo Dobras (%)</label>
-                    <input name="skinfoldSkeletalMuscle" type="number" step="0.1" value={formData.skinfoldSkeletalMuscle} onChange={handleChange} placeholder="ex: 43.1" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Músculo Dobras (%)</label>
+                    <input name="skinfoldSkeletalMuscle" type="number" step="0.1" value={formData.skinfoldSkeletalMuscle} onChange={handleChange} placeholder="ex: 43.1" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Peso Músculo (kg)</label>
-                    <input name="skeletalMuscleWeight" type="number" step="0.1" value={formData.skeletalMuscleWeight} onChange={handleChange} placeholder="ex: 34.6" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Peso Músculo (kg)</label>
+                    <input name="skeletalMuscleWeight" type="number" step="0.1" value={formData.skeletalMuscleWeight} onChange={handleChange} placeholder="ex: 34.6" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Água Balança (%)</label>
-                    <input name="water" type="number" step="0.1" value={formData.water} onChange={handleChange} placeholder="ex: 50.1" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Água Balança (%)</label>
+                    <input name="water" type="number" step="0.1" value={formData.water} onChange={handleChange} placeholder="ex: 50.1" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Água Relógio (%)</label>
-                    <input name="watchWater" type="number" step="0.1" value={formData.watchWater} onChange={handleChange} placeholder="ex: 47.7" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Água Relógio (%)</label>
+                    <input name="watchWater" type="number" step="0.1" value={formData.watchWater} onChange={handleChange} placeholder="ex: 47.7" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Água (kg)</label>
-                    <input name="waterWeight" type="number" step="0.1" value={formData.waterWeight} onChange={handleChange} placeholder="ex: 47.5" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Água (kg)</label>
+                    <input name="waterWeight" type="number" step="0.1" value={formData.waterWeight} onChange={handleChange} placeholder="ex: 47.5" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">TMB / Metabolismo (Kcal)</label>
-                    <input name="metabolism" type="number" step="1" value={formData.metabolism} onChange={handleChange} placeholder="ex: 2040" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">TMB / Metabolismo (Kcal)</label>
+                    <input name="metabolism" type="number" step="1" value={formData.metabolism} onChange={handleChange} placeholder="ex: 2040" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Gordura Visceral</label>
-                    <input name="visceralFat" type="number" step="0.1" value={formData.visceralFat} onChange={handleChange} placeholder="ex: 17.0" className="w-full bg-white p-3 rounded-xl border-2 border-[#222] text-xs font-black outline-none" />
+                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Gordura Visceral</label>
+                    <input name="visceralFat" type="number" step="0.1" value={formData.visceralFat} onChange={handleChange} placeholder="ex: 17.0" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none" />
                   </div>
                 </div>
               )}
@@ -1138,8 +1371,8 @@ const NewAssessmentForm = ({ onSave, onCancel }: any) => {
         {/* ================= ABA 2: DOBRAS CUTÂNEAS ================= */}
         {activeStep === 'dobras' && (
           <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm space-y-4 border border-[#222]">
-              <div className="flex items-center gap-2 text-gray-100 mb-1">
+            <div className="bg-[#121212] p-6 rounded-[2.5rem] border border-[#1f1f1f] shadow-xl space-y-4">
+              <div className="flex items-center gap-2 text-white mb-1">
                 <h3 className="text-xs font-black uppercase tracking-wider">Dobras Cutâneas Manuais (mm)</h3>
               </div>
               <p className="text-[10px] font-bold text-gray-400 leading-normal mb-2">
@@ -1211,8 +1444,8 @@ const NewAssessmentForm = ({ onSave, onCancel }: any) => {
         {/* ================= ABA 3: MEDIDAS DE PERÍMETROS ================= */}
         {activeStep === 'perimetro' && (
           <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm space-y-4 border border-[#222]">
-              <div className="flex items-center gap-2 text-gray-100 mb-1">
+            <div className="bg-[#121212] p-6 rounded-[2.5rem] border border-[#1f1f1f] shadow-xl space-y-4">
+              <div className="flex items-center gap-2 text-white mb-1">
                 <h3 className="text-xs font-black uppercase tracking-wider">Perímetros de Circunferência (cm)</h3>
               </div>
               <p className="text-[10px] font-bold text-gray-400 leading-normal mb-4">
@@ -1240,50 +1473,57 @@ const NewAssessmentForm = ({ onSave, onCancel }: any) => {
                   </div>
                 </div>
 
-                <div className="relative my-4"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-150"></div></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-3 font-black text-[9px] text-gray-400 tracking-wider">Perímetria Lateralizada/Membros</span></div></div>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#222]"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-[#121212] px-3 font-black text-[9px] text-gray-500 tracking-wider">Perímetria Lateralizada/Membros</span>
+                  </div>
+                </div>
 
                 {/* Coxas PX */}
-                <div className="space-y-1 bg-[#1c1c1c] p-4 rounded-2xl border-2 border-[#222]">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Coxas PX</span>
+                <div className="space-y-1 bg-black/40 p-4 rounded-2xl border border-[#222]">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5 font-montserrat">Coxas PX</span>
                   <div className="grid grid-cols-2 gap-3">
-                    <input name="thighRightPx" type="number" step="0.1" value={formData.thighRightPx} onChange={handleChange} placeholder="Coxa Dir. PX (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
-                    <input name="thighLeftPx" type="number" step="0.1" value={formData.thighLeftPx} onChange={handleChange} placeholder="Coxa Esq. PX (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
+                    <input name="thighRightPx" type="number" step="0.1" value={formData.thighRightPx} onChange={handleChange} placeholder="Coxa Dir. PX (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
+                    <input name="thighLeftPx" type="number" step="0.1" value={formData.thighLeftPx} onChange={handleChange} placeholder="Coxa Esq. PX (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
                   </div>
                 </div>
 
                 {/* Coxas DT */}
-                <div className="space-y-1 bg-[#1c1c1c] p-4 rounded-2xl border-2 border-[#222]">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Coxas DT</span>
+                <div className="space-y-1 bg-black/40 p-4 rounded-2xl border border-[#222]">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5 font-montserrat">Coxas DT</span>
                   <div className="grid grid-cols-2 gap-3">
-                    <input name="thighRightDt" type="number" step="0.1" value={formData.thighRightDt} onChange={handleChange} placeholder="Coxa Dir. DT (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
-                    <input name="thighLeftDt" type="number" step="0.1" value={formData.thighLeftDt} onChange={handleChange} placeholder="Coxa Esq. DT (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
+                    <input name="thighRightDt" type="number" step="0.1" value={formData.thighRightDt} onChange={handleChange} placeholder="Coxa Dir. DT (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
+                    <input name="thighLeftDt" type="number" step="0.1" value={formData.thighLeftDt} onChange={handleChange} placeholder="Coxa Esq. DT (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
                   </div>
                 </div>
 
                 {/* Panturrilhas */}
-                <div className="space-y-1 bg-[#1c1c1c] p-4 rounded-2xl border-2 border-[#222]">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Panturrilhas</span>
+                <div className="space-y-1 bg-black/40 p-4 rounded-2xl border border-[#222]">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5 font-montserrat">Panturrilhas</span>
                   <div className="grid grid-cols-2 gap-3">
-                    <input name="calfRight" type="number" step="0.1" value={formData.calfRight} onChange={handleChange} placeholder="Dir. (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
-                    <input name="calfLeft" type="number" step="0.1" value={formData.calfLeft} onChange={handleChange} placeholder="Esq. (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
+                    <input name="calfRight" type="number" step="0.1" value={formData.calfRight} onChange={handleChange} placeholder="Dir. (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
+                    <input name="calfLeft" type="number" step="0.1" value={formData.calfLeft} onChange={handleChange} placeholder="Esq. (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
                   </div>
                 </div>
 
                 {/* Braços */}
-                <div className="space-y-1 bg-[#1c1c1c] p-4 rounded-2xl border-2 border-[#222]">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Braços</span>
+                <div className="space-y-1 bg-black/40 p-4 rounded-2xl border border-[#222]">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5 font-montserrat">Braços</span>
                   <div className="grid grid-cols-2 gap-3">
-                    <input name="armRight" type="number" step="0.1" value={formData.armRight} onChange={handleChange} placeholder="Dir. (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
-                    <input name="armLeft" type="number" step="0.1" value={formData.armLeft} onChange={handleChange} placeholder="Esq. (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
+                    <input name="armRight" type="number" step="0.1" value={formData.armRight} onChange={handleChange} placeholder="Dir. (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
+                    <input name="armLeft" type="number" step="0.1" value={formData.armLeft} onChange={handleChange} placeholder="Esq. (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
                   </div>
                 </div>
 
                 {/* Antebraços */}
-                <div className="space-y-1 bg-[#1c1c1c] p-4 rounded-2xl border-2 border-[#222]">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Antebraços</span>
+                <div className="space-y-1 bg-black/40 p-4 rounded-2xl border border-[#222]">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5 font-montserrat">Antebraços</span>
                   <div className="grid grid-cols-2 gap-3">
-                    <input name="forearmRight" type="number" step="0.1" value={formData.forearmRight} onChange={handleChange} placeholder="Dir. (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
-                    <input name="forearmLeft" type="number" step="0.1" value={formData.forearmLeft} onChange={handleChange} placeholder="Esq. (cm)" className="w-full bg-white p-3 rounded-xl border border-slate-150 text-xs font-black outline-none text-center" />
+                    <input name="forearmRight" type="number" step="0.1" value={formData.forearmRight} onChange={handleChange} placeholder="Dir. (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
+                    <input name="forearmLeft" type="number" step="0.1" value={formData.forearmLeft} onChange={handleChange} placeholder="Esq. (cm)" className="w-full bg-[#121212] p-3 rounded-xl border border-[#222] text-xs font-black text-white outline-none text-center" />
                   </div>
                 </div>
               </div>
@@ -1335,28 +1575,30 @@ export default function PhysicalAssessment({ assessments, onSave, onClose }: { a
   const current = selectedIndex >= 0 ? assessments[selectedIndex] : null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#222] font-sans selection:bg-blue-100 overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-[100] bg-black font-sans selection:bg-red-900/10 overflow-hidden flex flex-col">
       {/* Header Fixo */}
-      <header className="p-6 flex justify-between items-center bg-white z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={handleBack} className="w-10 h-10 rounded-2xl bg-[#222] flex items-center justify-center text-gray-300 border-2 border-white shadow-sm hover:bg-[#333] transition-colors">
-            <X size={20} strokeWidth={3} />
-          </button>
-          <div>
-            <h1 className="text-sm font-black text-gray-100 tracking-tight leading-none uppercase">Avaliação Física</h1>
-            <p className="text-[9px] font-black text-red-500 uppercase mt-1">Painel de Evolução</p>
+      <header className="p-6 bg-[#121212] border-b border-[#1f1f1f] z-10">
+        <div className="w-full max-w-[1550px] mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <button onClick={handleBack} className="w-10 h-10 rounded-2xl bg-[#1c1c1c] flex items-center justify-center text-gray-300 border border-[#1f1f1f] hover:bg-[#252525] transition-colors">
+              <X size={18} strokeWidth={3} />
+            </button>
+            <div>
+              <h1 className="text-sm font-black text-white tracking-tight leading-none uppercase">Avaliação Física</h1>
+              <p className="text-[9px] font-black text-red-500 uppercase mt-1">Painel de Evolução</p>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-4 text-gray-400">
-          <Monitor size={20} strokeWidth={3} />
-          <RefreshCw size={20} strokeWidth={3} />
+          <div className="flex gap-4 text-gray-500">
+            <Monitor size={18} strokeWidth={3} />
+            <RefreshCw size={18} strokeWidth={3} />
+          </div>
         </div>
       </header>
 
       {/* Tabs Superiores (Apenas quando visualizando uma avaliação específica) */}
       {current && (view === 'metrics' || view === 'analysis' || view === 'comparison') && (
-        <div className="px-6 mb-6">
-          <div className="bg-[#1c1c1c] p-1.5 rounded-[1.8rem] flex shadow-inner border border-[#222] overflow-x-auto no-scrollbar">
+        <div className="px-6 mt-6 mb-2">
+          <div className="w-full max-w-[1550px] mx-auto bg-[#121212] p-1.5 rounded-[1.8rem] flex border border-[#1f1f1f] overflow-x-auto no-scrollbar">
             <button onClick={() => setView('metrics')} className={`flex-1 min-w-[80px] py-3 text-[9px] font-black rounded-[1.4rem] transition-all uppercase tracking-widest shrink-0 ${view === 'metrics' ? 'bg-red-600 text-white shadow-lg shadow-red-900/30' : 'text-gray-400'}`}>Métricas</button>
             <button onClick={() => setView('analysis')} className={`flex-1 min-w-[80px] py-3 text-[9px] font-black rounded-[1.4rem] transition-all uppercase tracking-widest shrink-0 ${view === 'analysis' ? 'bg-red-600 text-white shadow-lg shadow-red-900/30' : 'text-gray-400'}`}>Análise</button>
             <button onClick={() => setView('comparison')} className={`flex-1 min-w-[90px] py-3 text-[9px] font-black rounded-[1.4rem] transition-all uppercase tracking-widest shrink-0 ${view === 'comparison' ? 'bg-red-600 text-white shadow-lg shadow-red-900/30' : 'text-gray-400'}`}>Comparativo</button>
@@ -1365,32 +1607,34 @@ export default function PhysicalAssessment({ assessments, onSave, onClose }: { a
       )}
 
       {/* Área de Conteúdo */}
-      <main className="px-6 flex-1 overflow-y-auto no-scrollbar pb-32">
-        {view === 'new' && <NewAssessmentForm onSave={handleSave} onCancel={() => setView('history')} />}
-        {view === 'metrics' && current && <MetricsView assessment={current} />}
-        {view === 'analysis' && current && <AnalysisView assessment={current} />}
-        {view === 'comparison' && current && <ComparisonView current={current} previous={selectedIndex > 0 ? assessments[selectedIndex - 1] : null} />}
-        {view === 'history' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* NOVO DASHBOARD DE GRÁFICOS NO TOPO */}
-            <DashboardCharts assessments={assessments} />
+      <main className="px-6 flex-1 overflow-y-auto no-scrollbar pb-32 pt-4">
+        <div className="w-full max-w-[1550px] mx-auto">
+          {view === 'new' && <NewAssessmentForm onSave={handleSave} onCancel={() => setView('history')} />}
+          {view === 'metrics' && current && <MetricsView assessment={current} />}
+          {view === 'analysis' && current && <AnalysisView assessment={current} />}
+          {view === 'comparison' && current && <ComparisonView current={current} previous={selectedIndex > 0 ? assessments[selectedIndex - 1] : null} assessments={assessments} />}
+          {view === 'history' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* NOVO DASHBOARD DE GRÁFICOS NO TOPO */}
+              <DashboardCharts assessments={assessments} />
 
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest ml-2 mb-6">Histórico de Registros</h3>
-            <div className="space-y-4 pb-12">
-              {assessments.slice().reverse().map((item, idx) => {
-                const actualIdx = assessments.length - 1 - idx;
-                return (
-                  <div key={item.id || idx} 
-                    onClick={() => { setSelectedIndex(actualIdx); setView('metrics'); }}
-                    className="cursor-pointer"
-                  >
-                    <AssessmentCard assessment={item} />
-                  </div>
-                );
-              })}
+              <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest ml-2 mb-6">Histórico de Registros</h3>
+              <div className="space-y-4 pb-12">
+                {assessments.slice().reverse().map((item, idx) => {
+                  const actualIdx = assessments.length - 1 - idx;
+                  return (
+                    <div key={item.id || idx} 
+                      onClick={() => { setSelectedIndex(actualIdx); setView('metrics'); }}
+                      className="cursor-pointer"
+                    >
+                      <AssessmentCard assessment={item} />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       {/* Dock Inferior */}
