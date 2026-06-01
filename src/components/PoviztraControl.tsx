@@ -3,31 +3,49 @@ import { Pill, Droplet, RefreshCcw, CheckCircle2, Timer, Beaker, AlertCircle, Li
 import { User } from '../types';
 import { savePoviztraData, subscribeToPoviztraData } from '../services/firestoreService';
 
+const DEFAULT_HISTORY = [
+  { id: 19, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '26/05/2026 08:00:00' },
+  { id: 18, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '25/05/2026 08:00:00' },
+  { id: 17, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '23/05/2026 08:00:00' },
+  { id: 16, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '22/05/2026 08:00:00' },
+  { id: 15, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '21/05/2026 08:00:00' },
+  { id: 14, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '20/05/2026 08:00:00' },
+  { id: 13, name: 'CONSULTA: Reavaliação Poviztra (Dr. Noé)', timestamp: '29/05/2026 10:00:00' },
+  { id: 12, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '19/05/2026 08:00:00' },
+  { id: 11, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '18/05/2026 08:00:00' },
+  { id: 10, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '16/05/2026 08:00:00' },
+  { id: 9, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '15/05/2026 08:00:00' },
+  { id: 8, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '14/05/2026 08:00:00' },
+  { id: 7, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '13/05/2026 08:00:00' },
+  { id: 6, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '12/05/2026 08:00:00' },
+  { id: 5, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '11/05/2026 08:00:00' },
+  { id: 4, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '09/05/2026 08:00:00' },
+  { id: 3, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '08/05/2026 08:00:00' },
+  { id: 2, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '07/05/2026 08:00:00' },
+  { id: 1, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '06/05/2026 08:00:00' }
+];
+
+const DEFAULT_OZEMPIC = {
+  name: 'Poviztra',
+  totalUnits: 300,
+  remainingUnits: 206,
+  startWeight: 101.7, 
+  purchaseDate: '2026-05-06',
+  startDate: '2026-05-06',
+};
+
+const DEFAULT_VITAMINS = {
+  b12: { name: 'Vitamina B12', lastDose: null, nextDose: null, cyclePhase: 'active' },
+  vitD: { name: 'Vitamina D', lastDose: null, nextDose: null, cyclePhase: 'active' },
+  iron: { name: 'Ferro', lastDose: null, nextDose: null },
+  vonau: { name: 'Vonau Flash (SOS)', lastDose: null, nextDose: null, description: '8mg - Para náuseas/vômitos' }
+};
+
 export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }) => {
   // --- ESTADOS ---
   const [globalHistory, setGlobalHistory] = useState<{ id: number; name: string; timestamp: string }[]>(() => {
     const saved = localStorage.getItem(`history_${currentUser.id}`);
-    return saved ? JSON.parse(saved) : [
-      { id: 19, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '26/05/2026 08:00:00' },
-      { id: 18, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '25/05/2026 08:00:00' },
-      { id: 17, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '23/05/2026 08:00:00' },
-      { id: 16, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '22/05/2026 08:00:00' },
-      { id: 15, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '21/05/2026 08:00:00' },
-      { id: 14, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '20/05/2026 08:00:00' },
-      { id: 13, name: 'CONSULTA: Reavaliação Poviztra (Dr. Noé)', timestamp: '29/05/2026 10:00:00' },
-      { id: 12, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '19/05/2026 08:00:00' },
-      { id: 11, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '18/05/2026 08:00:00' },
-      { id: 10, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '16/05/2026 08:00:00' },
-      { id: 9, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '15/05/2026 08:00:00' },
-      { id: 8, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '14/05/2026 08:00:00' },
-      { id: 7, name: 'Dose Poviztra (4 clicks - Semana 2)', timestamp: '13/05/2026 08:00:00' },
-      { id: 6, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '12/05/2026 08:00:00' },
-      { id: 5, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '11/05/2026 08:00:00' },
-      { id: 4, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '09/05/2026 08:00:00' },
-      { id: 3, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '08/05/2026 08:00:00' },
-      { id: 2, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '07/05/2026 08:00:00' },
-      { id: 1, name: 'Dose Poviztra (4 clicks - Semana 1)', timestamp: '06/05/2026 08:00:00' }
-    ];
+    return saved ? JSON.parse(saved) : [...DEFAULT_HISTORY];
   });
   const [expandedSection, setExpandedSection] = useState('summary');
 
@@ -36,25 +54,13 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
   // Poviztra: 300 clicks totais
   const [ozempic, setOzempic] = useState(() => {
     const saved = localStorage.getItem(`ozempic_${currentUser.id}`);
-    return saved ? JSON.parse(saved) : {
-      name: 'Poviztra',
-      totalUnits: 300,
-      remainingUnits: 206, // Updated: 248 - (6 doses * 6 clicks + 1 * 6 clicks for today) = 206
-      startWeight: 101.7, 
-      purchaseDate: '2026-05-06',
-      startDate: '2026-05-06',
-    };
+    return saved ? JSON.parse(saved) : { ...DEFAULT_OZEMPIC };
   });
 
   // Vitaminas
   const [vitamins, setVitamins] = useState<Record<string, any>>(() => {
     const saved = localStorage.getItem(`vitamins_${currentUser.id}`);
-    return saved ? JSON.parse(saved) : {
-      b12: { name: 'Vitamina B12', lastDose: null, nextDose: null, cyclePhase: 'active' },
-      vitD: { name: 'Vitamina D', lastDose: null, nextDose: null, cyclePhase: 'active' },
-      iron: { name: 'Ferro', lastDose: null, nextDose: null },
-      vonau: { name: 'Vonau Flash (SOS)', lastDose: null, nextDose: null, description: '8mg - Para náuseas/vômitos' }
-    };
+    return saved ? JSON.parse(saved) : { ...DEFAULT_VITAMINS };
   });
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -63,11 +69,97 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
   useEffect(() => {
     if (currentUser) {
       const unsubscribe = subscribeToPoviztraData(currentUser.id, (cloudData) => {
-        if (cloudData) {
-          if (cloudData.globalHistory) setGlobalHistory(cloudData.globalHistory);
-          if (cloudData.ozempic) setOzempic(cloudData.ozempic);
-          if (cloudData.vitamins) setVitamins(cloudData.vitamins);
+        let currentHistory = cloudData?.globalHistory ? [...cloudData.globalHistory] : [];
+        let currentOzempic = cloudData?.ozempic ? { ...cloudData.ozempic } : null;
+        let currentVitamins = cloudData?.vitamins ? { ...cloudData.vitamins } : null;
+
+        // If cloud data is empty, fall back to default or localStorage
+        if (currentHistory.length === 0) {
+          const savedHistory = localStorage.getItem(`history_${currentUser.id}`);
+          currentHistory = savedHistory ? JSON.parse(savedHistory) : [...DEFAULT_HISTORY];
         }
+        if (!currentOzempic) {
+          const savedOz = localStorage.getItem(`ozempic_${currentUser.id}`);
+          currentOzempic = savedOz ? JSON.parse(savedOz) : { ...DEFAULT_OZEMPIC };
+        }
+        if (!currentVitamins) {
+          const savedVits = localStorage.getItem(`vitamins_${currentUser.id}`);
+          currentVitamins = savedVits ? JSON.parse(savedVits) : { ...DEFAULT_VITAMINS };
+        }
+
+        // Auto-registro das doses de 26, 27, 28, 29, 30 de maio de 2026 e 01 de junho de 2026 (hoje)
+        const datesToRegister = [
+          { date: '26/05/2026', checkStr: '26/05/2026' },
+          { date: '27/05/2026', checkStr: '27/05/2026' },
+          { date: '28/05/2026', checkStr: '28/05/2026' },
+          { date: '29/05/2026', checkStr: '29/05/2026' },
+          { date: '30/05/2026', checkStr: '30/05/2026' },
+          { date: '01/06/2026', checkStr: '01/06/2026' },
+        ];
+
+        let historyChanged = false;
+
+        datesToRegister.forEach(({ date, checkStr }) => {
+          // Verificar se já existe uma dose marcada nessa data específica
+          const alreadyExists = currentHistory.some(item => 
+            item.name.toLowerCase().includes('dose poviztra') && item.timestamp.includes(checkStr)
+          );
+
+          if (!alreadyExists) {
+            // Calcular a semana precisa baseada no ozempic.startDate
+            const parts = date.split('/');
+            const dateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            const startObj = new Date(currentOzempic.startDate);
+            const diffDays = Math.floor((dateObj.getTime() - startObj.getTime()) / (1000 * 60 * 60 * 24));
+            const semanaCalculada = Math.ceil((diffDays + 1) / 7) || 1;
+
+            const id = Date.now() + Math.floor(Math.random() * 100000) + Math.floor(Math.random() * 1000);
+            currentHistory.unshift({
+              id,
+              name: `Dose Poviztra (6 clicks - Semana ${semanaCalculada})`,
+              timestamp: `${date} 08:00:00`
+            });
+
+            // Reduzir as unidades do Ozempic/Poviztra (6 clicks)
+            currentOzempic.remainingUnits = Math.max(0, currentOzempic.remainingUnits - 6);
+            historyChanged = true;
+          }
+        });
+
+        if (historyChanged) {
+          // Ordenar o histórico por data de forma decrescente para manter a coerência visual
+          currentHistory.sort((a, b) => {
+            const partsA = a.timestamp.split(' ');
+            const datePartsA = partsA[0].split('/');
+            const timePartsA = partsA[1].split(':');
+            const dateA = new Date(
+              parseInt(datePartsA[2]), 
+              parseInt(datePartsA[1]) - 1, 
+              parseInt(datePartsA[0]), 
+              parseInt(timePartsA[0]), 
+              parseInt(timePartsA[1]), 
+              parseInt(timePartsA[2] || '0')
+            );
+
+            const partsB = b.timestamp.split(' ');
+            const datePartsB = partsB[0].split('/');
+            const timePartsB = partsB[1].split(':');
+            const dateB = new Date(
+              parseInt(datePartsB[2]), 
+              parseInt(datePartsB[1]) - 1, 
+              parseInt(datePartsB[0]), 
+              parseInt(timePartsB[0]), 
+              parseInt(timePartsB[1]), 
+              parseInt(timePartsB[2] || '0')
+            );
+
+            return dateB.getTime() - dateA.getTime();
+          });
+        }
+
+        setGlobalHistory(currentHistory);
+        setOzempic(currentOzempic);
+        setVitamins(currentVitamins);
         setIsDataLoaded(true);
       });
       return () => unsubscribe();

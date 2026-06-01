@@ -47,6 +47,12 @@ service cloud.firestore {
              (!('workouts' in data) || (data.workouts is list && data.workouts.size() <= 500));
     }
 
+    function isValidPoviztra(data) {
+      return (!('globalHistory' in data) || (data.globalHistory is list && data.globalHistory.size() <= 1000)) &&
+             (!('ozempic' in data) || data.ozempic is map) &&
+             (!('vitamins' in data) || data.vitamins is map);
+    }
+
     // Connection Test Document Match
     match /test/connection {
       allow read: if true;
@@ -69,6 +75,13 @@ service cloud.firestore {
       match /progress/{docId} {
         allow read: if isValidUserId(userId) && isValidId(userId) && docId == 'main';
         allow create, update: if isValidUserId(userId) && isValidId(userId) && docId == 'main' && isValidProgress(incoming());
+        allow delete: if false;
+      }
+
+      // Nested Poviztra Data
+      match /poviztra/{docId} {
+        allow read: if isValidUserId(userId) && isValidId(userId) && docId == 'main';
+        allow create, update: if isValidUserId(userId) && isValidId(userId) && docId == 'main' && isValidPoviztra(incoming());
         allow delete: if false;
       }
     }

@@ -34,6 +34,16 @@
         "data": { "type": "array" },
         "workouts": { "type": "array" }
       }
+    },
+    "Poviztra": {
+      "title": "Poviztra",
+      "description": "Poviztra (Ozempic) tracking and vitamins history",
+      "type": "object",
+      "properties": {
+        "globalHistory": { "type": "array" },
+        "ozempic": { "type": "object" },
+        "vitamins": { "type": "object" }
+      }
     }
   },
   "firestore": {
@@ -48,6 +58,10 @@
     "/users/{userId}/progress/main": {
       "schema": "Progress",
       "description": "User progress data"
+    },
+    "/users/{userId}/poviztra/main": {
+      "schema": "Poviztra",
+      "description": "Poviztra tracking and vitamins"
     }
   }
 }

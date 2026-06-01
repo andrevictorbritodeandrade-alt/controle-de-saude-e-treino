@@ -32,7 +32,8 @@ import {
   BellRing,
   User as UserIcon,
   ChevronRight,
-  ClipboardList
+  ClipboardList,
+  Sparkles
 } from 'lucide-react';
 
 import { ExerciseTracker } from './components/ExerciseTracker';
@@ -111,6 +112,7 @@ const App = () => {
   const [showHealthMenu, setShowHealthMenu] = useState(false);
   const [healthInputType, setHealthInputType] = useState<'glucose' | 'bp' | 'hr' | null>(null);
   const [healthInputValue, setHealthInputValue] = useState('');
+  const [isAiInputExpanded, setIsAiInputExpanded] = useState(true);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   const metaPeso = 87;
@@ -1244,47 +1246,67 @@ const App = () => {
 
         {/* INPUT DE IA - GLOBAL */}
         {(activeTab === 'saude' || activeTab === 'diario') && (
-          <div className="fixed bottom-32 left-1/2 -translate-x-1/2 w-full max-w-xl lg:max-w-4xl px-4 z-40">
-            <div className="bg-[#121212]/90 backdrop-blur-2xl p-3 pl-5 rounded-full border border-[#1f1f1f] shadow-2xl flex items-center gap-3 ring-4 ring-black/40">
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="w-12 h-12 bg-[#1c1c1c] rounded-full flex items-center justify-center text-gray-400 cursor-pointer hover:text-red-500 hover:bg-[#222] transition-all"
-              >
-                {selectedImage ? (
-                  <div className="relative">
-                    <img src={selectedImage} alt="Preview" className="w-8 h-8 rounded-lg object-cover" />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#121212]" />
-                  </div>
-                ) : (
-                  <Plus size={24} />
-                )}
+          isAiInputExpanded ? (
+            <div className="fixed bottom-32 left-1/2 -translate-x-1/2 w-full max-w-xl lg:max-w-4xl px-4 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
+              <div className="bg-[#121212]/90 backdrop-blur-2xl p-3 pl-5 rounded-full border border-[#1f1f1f] shadow-2xl flex items-center gap-3 ring-4 ring-black/40">
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-12 h-12 bg-[#1c1c1c] rounded-full flex items-center justify-center text-gray-400 cursor-pointer hover:text-red-500 hover:bg-[#222] transition-all shrink-0"
+                >
+                  {selectedImage ? (
+                    <div className="relative">
+                      <img src={selectedImage} alt="Preview" className="w-8 h-8 rounded-lg object-cover" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#121212]" />
+                    </div>
+                  ) : (
+                    <Plus size={24} />
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={(e) => handleImageUpload(e)} 
+                  className="hidden" 
+                  accept="image/*"
+                />
+                <input 
+                  type="text" 
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="O que você comeu? (ex: 2 ovos e café)" 
+                  className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-white placeholder:text-gray-600 italic min-w-0"
+                />
+                <button 
+                  onClick={handleSendMessage}
+                  disabled={isProcessing}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                    inputText || selectedImage ? 'bg-red-600 text-white scale-110' : 'bg-[#1c1c1c] text-gray-700'
+                  }`}
+                >
+                  <Send size={20} className={isProcessing ? 'animate-pulse' : ''} />
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setIsAiInputExpanded(false)}
+                  title="Ocultar Assistente"
+                  className="w-12 h-12 rounded-full bg-[#1c1c1c] hover:bg-[#222] text-gray-400 hover:text-white transition-all flex items-center justify-center shrink-0 border border-[#1f1f1f]"
+                >
+                  <ChevronDown size={20} />
+                </button>
               </div>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={(e) => handleImageUpload(e)} 
-                className="hidden" 
-                accept="image/*"
-              />
-              <input 
-                type="text" 
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="O que você comeu? (ex: 2 ovos e café)" 
-                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-white placeholder:text-gray-600 italic"
-              />
-              <button 
-                onClick={handleSendMessage}
-                disabled={isProcessing}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                  inputText || selectedImage ? 'bg-red-600 text-white scale-110' : 'bg-[#1c1c1c] text-gray-700'
-                }`}
-              >
-                <Send size={20} className={isProcessing ? 'animate-pulse' : ''} />
-              </button>
             </div>
-          </div>
+          ) : (
+            <button 
+              type="button"
+              onClick={() => setIsAiInputExpanded(true)}
+              title="Abrir Assistente de IA"
+              className="fixed bottom-32 right-6 lg:right-1/2 lg:translate-x-[240px] z-40 w-14 h-14 bg-red-600 hover:bg-red-700 hover:scale-105 active:scale-95 text-white rounded-full flex items-center justify-center shadow-2xl transition-all cursor-pointer border border-[#1f1f1f] ring-4 ring-black/40 animate-bounce duration-1000"
+              style={{ animationDuration: '3s' }}
+            >
+              <Sparkles size={24} className="animate-pulse text-white" />
+            </button>
+          )
         )}
 
         {activeTab === 'diario' && (
