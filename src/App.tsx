@@ -1280,7 +1280,7 @@ const App = () => {
         )}
 
         {/* INPUT DE IA - GLOBAL */}
-        {(activeTab === 'saude' || activeTab === 'diario') && (
+        {activeTab === 'diario' && (
           isAiInputExpanded ? (
             <div className="fixed bottom-32 left-1/2 -translate-x-1/2 w-full max-w-xl lg:max-w-4xl px-4 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
               <div className="bg-[#121212]/90 backdrop-blur-2xl p-3 pl-5 rounded-full border border-[#1f1f1f] shadow-2xl flex items-center gap-3 ring-4 ring-black/40">
