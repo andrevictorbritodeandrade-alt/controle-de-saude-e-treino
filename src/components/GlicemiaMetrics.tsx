@@ -407,7 +407,7 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
                 isAnimationActive={false}
               >
                 {/* Labels only if we are seeing a shorter period to prevent cluttering */}
-                {filteredData.length <= 15 && (
+                {filteredData.length <= 35 && (
                   <LabelList 
                     dataKey="value" 
                     position="top" 
@@ -421,6 +421,95 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
         </div>
         <p className="text-[10px] text-gray-500 font-medium italic mt-4 text-center leading-relaxed">
           💡 Clique nos botões acima (7d, 15d, 30d, Tudo) para expandir ou focar no gráfico e ver as flutuações em detalhes!
+        </p>
+      </div>
+
+      {/* NOVO MAPA/TABELA DE CONTROLE DE GLICEMIA (SÓ OS NÚMEROS ORDENADOS DO MAIS RECENTE AO MAIS ANTIGO) */}
+      <div className="bg-[#121212] p-6 rounded-[2.5rem] shadow-sm border border-[#1a1a1a]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+              <Calendar size={16} className="text-red-500" /> Tabela de Leituras (Mapa de Glicemias)
+            </h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Visão detalhada seqüencial, de frente para trás</p>
+          </div>
+          
+          <div className="text-[11px] font-black uppercase text-gray-500 tracking-widest bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
+            Total: <span className="text-white">{data.length}</span> registros
+          </div>
+        </div>
+
+        {/* LISTA EM GRID/TABELA */}
+        <div className="max-h-[420px] overflow-y-auto pr-2 space-y-2.5 custom-scrollbar">
+          {data.slice().reverse().map((item, idx) => {
+            // Get range colors for beautiful numbering
+            let rangeBadgeColor = 'bg-green-500/10 text-green-400 border-green-500/20';
+            let labelText = 'Normal';
+            if (item.value < 70) {
+              labelText = item.value <= 55 ? 'Hipo Severa' : 'Hipoglicemia';
+              rangeBadgeColor = item.value <= 55 
+                ? 'bg-red-950 text-rose-500 border-red-500/30' 
+                : 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+            } else if (item.value > 140) {
+              labelText = 'Elevada';
+              rangeBadgeColor = 'bg-red-500/10 text-red-400 border-red-500/20';
+            }
+
+            return (
+              <div 
+                key={item.id} 
+                className="flex items-center justify-between bg-black/40 border border-[#1a1a1a] hover:border-neutral-800 p-3.5 rounded-2xl transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Sequence count index backwards */}
+                  <span className="text-[10px] font-black font-mono text-gray-600 bg-[#121212] w-6 h-6 rounded-lg flex items-center justify-center">
+                    #{data.length - idx}
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-white">{item.date}</span>
+                      <span className="text-[9px] font-bold text-gray-500 bg-white/5 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                        <Clock size={8} /> {item.time}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 block">
+                      Período: {item.period || 'Manual'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className={`text-[9px] font-black uppercase tracking-widest border px-2.5 py-1 rounded-lg ${rangeBadgeColor}`}>
+                    {labelText}
+                  </span>
+                  
+                  <div className="text-right">
+                    <span className="text-xl font-bold font-montserrat text-white tracking-tight">
+                      {item.value}
+                    </span>
+                    <span className="text-[9px] font-semibold text-gray-500 block">mg/dL</span>
+                  </div>
+
+                  {/* Boutão DELETE para correções */}
+                  <button
+                    onClick={() => {
+                      if (confirm('Deseja excluir este registro de glicemia?')) {
+                        setData(prev => prev.filter(entry => entry.id !== item.id));
+                      }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/10 text-gray-500 hover:text-red-500 rounded-lg transition-all"
+                    title="Excluir medição"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider text-center mt-4">
+          👉 Role a lista acima para visualizar todos os {data.length} números em detalhe, de hoje (53) até as medições anteriores no aparelho!
         </p>
       </div>
 
