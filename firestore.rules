@@ -44,7 +44,8 @@ service cloud.firestore {
     // Enforce size bounds and array type basics
     function isValidProgress(data) {
       return (!('data' in data) || (data.data is list && data.data.size() <= 500)) &&
-             (!('workouts' in data) || (data.workouts is list && data.workouts.size() <= 500));
+             (!('workouts' in data) || (data.workouts is list && data.workouts.size() <= 500)) &&
+             (!('glucoseData' in data) || (data.glucoseData is list && data.glucoseData.size() <= 500));
     }
 
     function isValidPoviztra(data) {

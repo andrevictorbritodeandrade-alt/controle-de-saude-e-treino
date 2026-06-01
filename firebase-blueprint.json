@@ -32,7 +32,8 @@
       "type": "object",
       "properties": {
         "data": { "type": "array" },
-        "workouts": { "type": "array" }
+        "workouts": { "type": "array" },
+        "glucoseData": { "type": "array" }
       }
     },
     "Poviztra": {

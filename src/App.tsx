@@ -38,6 +38,7 @@ import {
 
 import { ExerciseTracker } from './components/ExerciseTracker';
 import { WeightMetrics } from './components/WeightMetrics';
+import { GlicemiaMetrics } from './components/GlicemiaMetrics';
 import PhysicalAssessment from './components/PhysicalAssessment';
 import { PoviztraControl } from './components/PoviztraControl';
 import { motion } from 'motion/react';
@@ -1026,6 +1027,7 @@ const App = () => {
           <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-24 items-start">
             <div className="space-y-6">
               <WeightMetrics currentUser={currentUser} />
+              <GlicemiaMetrics currentUser={currentUser} />
             </div>
             
             <div className="space-y-6">
