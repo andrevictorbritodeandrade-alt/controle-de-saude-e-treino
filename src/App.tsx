@@ -18,9 +18,7 @@ import {
   History,
   Coffee,
   CheckCircle2,
-  ChefHat,
   Flame,
-  Utensils,
   Target,
   Calendar,
   AlertCircle,
@@ -70,15 +68,7 @@ interface MealData {
   title?: string;
 }
 
-interface Recipe {
-  id: number;
-  titulo: string;
-  tempo: string;
-  nivel: string;
-  calorias: string;
-  ingredientes: string[];
-  preparo: string[];
-}
+
 
 const App = () => {
   console.log("App rendering...");
@@ -95,7 +85,7 @@ const App = () => {
     }
   }, []);
 
-  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'receitas' | 'poviztra' | 'diario' | 'historico'>('saude');
+  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'poviztra' | 'diario' | 'historico'>('saude');
   const [showPhysicalAssessment, setShowPhysicalAssessment] = useState(false);
   const [isDiaDeTreino, setIsDiaDeTreino] = useState(() => {
     const day = new Date().getDay();
@@ -253,6 +243,21 @@ const App = () => {
       forearmRight: '---', forearmLeft: '---',
       leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
       fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
+    },
+    {
+      id: 12, date: '2026/06/02', time: '08:00:00',
+      weight: '97.3', weightStatus: 'Obeso', bmi: '30.0', bodyFat: '34.0', fatWeight: '33.1',
+      skeletalMuscle: '36.8', skeletalMuscleWeight: '35.8', muscleRate: '36.8', muscleWeight: '35.8',
+      water: '47.8', waterWeight: '46.5', visceralFat: '15.0', boneMass: '4.95',
+      metabolism: '1763.0', protein: '12.8', obesityLevel: '139.0', metabolicAge: '46.0',
+      lbm: '64.2', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
+      fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
     }
   ]);
   
@@ -290,63 +295,7 @@ const App = () => {
   // Inicia com as refeições do dia 23/04 (Café da Manhã e Almoço) temporariamente inseridas conforme pedido
   const [confirmedMeals, setConfirmedMeals] = useState<Record<number, MealData>>({});
 
-  const receitas: Recipe[] = [
-    {
-      id: 1,
-      titulo: "Peito de Frango Grelhado (O Segredo da Suculência)",
-      tempo: "20 min",
-      nivel: "Fácil",
-      calorias: "165 kcal/100g",
-      ingredientes: [
-        "150g de filé de peito de frango",
-        "Sal e pimenta-do-reino a gosto",
-        "1 dente de alho amassado",
-        "Páprica defumada (essencial para a cor)",
-        "Fio de azeite"
-      ],
-      preparo: [
-        "Técnica de Brine: Deixe o frango em água com sal por 10 min antes de grelhar para não secar.",
-        "Tempere with alho e páprica. Não use temperos prontos com muito sódio!",
-        "Aqueça a frigideira até quase sair fumaça.",
-        "Sele o frango por 4 minutos de cada lado sem ficar mexendo. Isso cria a reação de Maillard (aquela crostinha saborosa).",
-        "Deixe descansar 2 minutos antes de cortar para os sucos não saírem."
-      ]
-    },
-    {
-      id: 2,
-      titulo: "Arroz Temperado Master",
-      tempo: "25 min",
-      nivel: "Fácil",
-      calorias: "130 kcal/100g",
-      ingredientes: [
-        "1 xícara de arroz agulhinha",
-        "2 xícaras de água fervendo",
-        "Cebola e alho picados finamente",
-        "Cenoura ralada (opcional para volume)"
-      ],
-      preparo: [
-        "Refogue a cebola e o alho no azeite até ficarem translúcidos.",
-        "Frite o arroz cru por 2 minutos (isso sela o grão e deixa soltinho).",
-        "Adicione a água fervente de uma vez e ajuste o sal.",
-        "Cozinhe em fogo baixo com a tampa semi-aberta.",
-        "Quando a água secar, desligue e tampe por 5 min. Use um garfo para soltar os grãos."
-      ]
-    },
-    {
-      id: 3,
-      titulo: "Sopa de Legumes com Frango",
-      tempo: "40 min",
-      nivel: "Médio",
-      calorias: "175 kcal/porção",
-      ingredientes: ["Chuchu", "Abobrinha", "Cenoura", "Peito de frango desfiado", "Cúrcuma"],
-      preparo: [
-        "Refogue o frango com cúrcuma (anti-inflamatório).",
-        "Adicione os legumes cortados em cubos uniformes para cozimento igual.",
-        "Cubra com água e cozinhe até ficarem macios.",
-        "Dica Pro: Bata metade dos legumes no liquidificador e volte para a panela para dar cremosidade sem usar creme de leite."
-      ]
-    }
-  ];
+
 
   const CALORIE_GOAL = currentUser?.dietPlan?.kcalGoal || 1500; 
 
@@ -1056,7 +1005,11 @@ const App = () => {
         {activeTab === 'saude' && (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24 items-start">
             <div className="space-y-6">
-              <WeightMetrics currentUser={currentUser} />
+              <WeightMetrics 
+                currentUser={currentUser} 
+                assessments={bioimpedanceAssessments} 
+                onSaveAssessments={setBioimpedanceAssessments} 
+              />
               
               {/* SEÇÃO DE MEDICAÇÕES (DESLOCADA PARA COLUNA DE PESO) */}
               <div className="bg-[#121212] border border-[#1f1f1f] rounded-[2rem] p-6 shadow-xl">
@@ -1968,89 +1921,7 @@ const App = () => {
           </div>
         )}
 
-        {activeTab === 'receitas' && (
-          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
-            {receitas.map((recipe) => (
-              <div key={recipe.id} className="bg-[#121212] rounded-[2.5rem] shadow-lg border border-[#1f1f1f] overflow-hidden flex flex-col h-full">
-                <div className="p-8 flex-1">
-                  <div className="flex justify-between items-start mb-6">
-                    <h3 className="text-xl font-black text-white font-montserrat leading-tight max-w-[70%]">
-                      {recipe.titulo}
-                    </h3>
-                    <div className="bg-red-900/10 text-red-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
-                      {recipe.calorias}
-                    </div>
-                  </div>
 
-                  <div className="flex gap-4 mb-8">
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">{recipe.tempo}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <Flame className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">{recipe.nivel}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                        <Utensils className="w-3 h-3" /> Ingredientes
-                      </h4>
-                      <ul className="grid grid-cols-1 gap-2">
-                        {recipe.ingredientes.map((ing, idx) => (
-                          <li key={idx} className="flex items-center gap-3 text-sm text-gray-300 font-medium bg-[#1c1c1c] p-3 rounded-xl">
-                            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-                            {ing}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                        <CheckCircle2 className="w-3 h-3" /> Modo de Preparo
-                      </h4>
-                      <div className="space-y-4">
-                        {recipe.preparo.map((step, idx) => (
-                          <div key={idx} className="flex gap-4">
-                            <span className="text-lg font-black text-stone-200 font-montserrat leading-none">
-                              {(idx + 1).toString().padStart(2, '0')}
-                            </span>
-                            <p className="text-sm text-gray-300 font-medium leading-relaxed">
-                              {step}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => {
-                    const newId = Date.now();
-                    setConfirmedMeals(prev => ({
-                      ...prev,
-                      [newId]: {
-                        p: parseInt(recipe.calorias) / 20, // Rough estimate for demo
-                        c: parseInt(recipe.calorias) / 15,
-                        g: parseInt(recipe.calorias) / 40,
-                        kcal: parseInt(recipe.calorias),
-                        option: 'A',
-                        realDescription: `Receita: ${recipe.titulo}`
-                      }
-                    }));
-                    alert(`${recipe.titulo} adicionado ao seu diário!`);
-                  }}
-                  className="w-full py-4 bg-[#1c1c1c] text-gray-400 text-[10px] font-black uppercase tracking-widest border-t border-[#222] hover:bg-red-900/10 hover:text-red-500 transition-all mt-auto"
-                >
-                  Marcar como Feito (Adicionar ao Diário)
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       <footer className="w-full text-center p-6 text-[10px] text-gray-500 font-medium uppercase tracking-widest bg-[#0a0a0a] border-t border-[#1a1a1a] pb-28 space-y-3">
@@ -2099,13 +1970,7 @@ const App = () => {
             <span className="text-[10px] font-black uppercase tracking-widest px-1">Saúde</span>
           </button>
 
-          <button 
-            onClick={() => setActiveTab('receitas')}
-            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'receitas' ? 'text-red-600' : 'text-white'} flex-1`}
-          >
-            <ChefHat className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest px-1">Cozinha</span>
-          </button>
+
         </div>
       </nav>
 

@@ -31,49 +31,97 @@ export const initialData: ProgressEntry[] = [
   { date: '26/05', weight: 98.6, muscleMass: 37.2, bodyFat: 29.5 },
 ];
 
-export const WeightMetrics: React.FC<{ currentUser?: User }> = ({ currentUser }) => {
-  const [data, setData] = useState<ProgressEntry[]>(() => {
-    if (currentUser) {
-      const saved = localStorage.getItem(`weight_data_${currentUser.id}`);
-      if (saved) return JSON.parse(saved);
-    }
-    return initialData;
-  });
+export const WeightMetrics: React.FC<{ 
+  currentUser?: User;
+  assessments?: any[];
+  onSaveAssessments?: (assessments: any[]) => void;
+}> = ({ currentUser, assessments = [], onSaveAssessments }) => {
   const [newWeight, setNewWeight] = useState('');
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  useEffect(() => {
-    if (currentUser) {
-      const unsubscribe = subscribeToProgressData(currentUser.id, (cloudData) => {
-        if (cloudData && cloudData.data && cloudData.data.length > 0) {
-          setData(cloudData.data);
-          localStorage.setItem(`weight_data_${currentUser.id}`, JSON.stringify(cloudData.data));
-        }
-        setIsDataLoaded(true);
-      });
-      return () => unsubscribe();
-    } else {
-      setIsDataLoaded(true);
-    }
-  }, [currentUser]);
+  // Map bioimpedance assessments to ProgressEntries for charts and metrics
+  const data: ProgressEntry[] = React.useMemo(() => {
+    if (!assessments || assessments.length === 0) return initialData;
 
-  useEffect(() => {
-    if (currentUser && isDataLoaded) {
-      saveProgressData(currentUser.id, { data }).catch(console.error);
-      localStorage.setItem(`weight_data_${currentUser.id}`, JSON.stringify(data));
-    }
-  }, [data, currentUser, isDataLoaded]);
+    // Sort assessments chronologically
+    const sorted = [...assessments].sort((a, b) => {
+      const dateA = new Date(a.date.replace(/\//g, '-'));
+      const dateB = new Date(b.date.replace(/\//g, '-'));
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sorted.map((item) => {
+      const parts = item.date.split(/[-/]/);
+      let formattedDate = item.date;
+      if (parts.length >= 3) {
+        // format "DD/MM" (excluding Year)
+        formattedDate = `${parts[2]}/${parts[1]}`;
+      } else if (parts.length === 2) {
+        formattedDate = `${parts[1]}/${parts[0]}`;
+      }
+      return {
+        date: formattedDate,
+        weight: parseFloat(item.weight) || 0,
+        muscleMass: parseFloat(item.skeletalMuscle || item.skeletalMuscleWeight || item.muscleMass || 37.2),
+        bodyFat: parseFloat(item.bodyFat || 29.5),
+      };
+    });
+  }, [assessments]);
 
   const handleAddWeight = () => {
     if (!newWeight) return;
-    const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    const newEntry: ProgressEntry = {
-      date: today,
-      weight: parseFloat(newWeight),
-      muscleMass: data[data.length - 1].muscleMass,
-      bodyFat: data[data.length - 1].bodyFat,
+    
+    const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '/'); // "2026/06/02"
+    const todayTime = new Date().toTimeString().split(' ')[0]; // "19:40:00"
+    
+    const lastEntry = assessments && assessments.length > 0 ? assessments[assessments.length - 1] : null;
+
+    const newAssessment = {
+      id: lastEntry ? Number(lastEntry.id) + 1 : 12,
+      date: todayStr,
+      time: todayTime,
+      weight: parseFloat(newWeight).toFixed(1),
+      weightStatus: 'Obeso',
+      bmi: lastEntry ? lastEntry.bmi : '30.0',
+      bodyFat: lastEntry ? lastEntry.bodyFat : '34.0',
+      fatWeight: lastEntry ? lastEntry.fatWeight : '33.1',
+      skeletalMuscle: lastEntry ? lastEntry.skeletalMuscle : '36.8',
+      skeletalMuscleWeight: lastEntry ? lastEntry.skeletalMuscleWeight : '35.8',
+      muscleRate: lastEntry ? lastEntry.muscleRate : '36.8',
+      muscleWeight: lastEntry ? lastEntry.muscleWeight : '35.8',
+      water: lastEntry ? lastEntry.water : '47.8',
+      waterWeight: lastEntry ? lastEntry.waterWeight : '46.5',
+      visceralFat: lastEntry ? lastEntry.visceralFat : '15.0',
+      boneMass: lastEntry ? lastEntry.boneMass : '4.95',
+      metabolism: lastEntry ? lastEntry.metabolism : '1763.0',
+      protein: lastEntry ? lastEntry.protein : '12.8',
+      obesityLevel: lastEntry ? lastEntry.obesityLevel : '139.0',
+      metabolicAge: lastEntry ? lastEntry.metabolicAge : '46.0',
+      lbm: lastEntry ? lastEntry.lbm : '64.2',
+      realAge: '36',
+      height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
+      fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
     };
-    setData([...data, newEntry]);
+
+    if (onSaveAssessments) {
+      const existingTodayIndex = assessments.findIndex(a => a.date === todayStr);
+      if (existingTodayIndex >= 0) {
+        const updated = [...assessments];
+        updated[existingTodayIndex] = {
+          ...updated[existingTodayIndex],
+          weight: parseFloat(newWeight).toFixed(1),
+        };
+        onSaveAssessments(updated);
+      } else {
+        onSaveAssessments([...assessments, newAssessment]);
+      }
+    }
+    
     setNewWeight('');
   };
 
