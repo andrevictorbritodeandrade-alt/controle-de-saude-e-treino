@@ -4,6 +4,7 @@ import { User } from '../types';
 import { savePoviztraData, subscribeToPoviztraData } from '../services/firestoreService';
 
 const DEFAULT_HISTORY = [
+  { id: 20, name: 'Dose Poviztra (6 clicks - Semana 4)', timestamp: '02/06/2026 08:00:00' },
   { id: 19, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '26/05/2026 08:00:00' },
   { id: 18, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '25/05/2026 08:00:00' },
   { id: 17, name: 'Dose Poviztra (6 clicks - Semana 3)', timestamp: '23/05/2026 08:00:00' },
@@ -28,7 +29,7 @@ const DEFAULT_HISTORY = [
 const DEFAULT_OZEMPIC = {
   name: 'Poviztra',
   totalUnits: 300,
-  remainingUnits: 206,
+  remainingUnits: 200,
   startWeight: 101.7, 
   purchaseDate: '2026-05-06',
   startDate: '2026-05-06',
@@ -87,7 +88,7 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           currentVitamins = savedVits ? JSON.parse(savedVits) : { ...DEFAULT_VITAMINS };
         }
 
-        // Auto-registro das doses de 26, 27, 28, 29, 30 de maio de 2026 e 01 de junho de 2026 (hoje)
+        // Auto-registro das doses de 26, 27, 28, 29, 30 de maio de 2026 e 01, 02 de junho de 2026
         const datesToRegister = [
           { date: '26/05/2026', checkStr: '26/05/2026' },
           { date: '27/05/2026', checkStr: '27/05/2026' },
@@ -95,6 +96,7 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           { date: '29/05/2026', checkStr: '29/05/2026' },
           { date: '30/05/2026', checkStr: '30/05/2026' },
           { date: '01/06/2026', checkStr: '01/06/2026' },
+          { date: '02/06/2026', checkStr: '02/06/2026' },
         ];
 
         let historyChanged = false;

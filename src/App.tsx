@@ -39,6 +39,7 @@ import { WeightMetrics } from './components/WeightMetrics';
 import { GlicemiaMetrics } from './components/GlicemiaMetrics';
 import PhysicalAssessment from './components/PhysicalAssessment';
 import { PoviztraControl } from './components/PoviztraControl';
+import { NutrobarraMetrics } from './components/NutrobarraMetrics';
 import { motion } from 'motion/react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { 
@@ -85,7 +86,7 @@ const App = () => {
     }
   }, []);
 
-  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'poviztra' | 'diario' | 'historico'>('saude');
+  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'poviztra' | 'diario' | 'historico' | 'nutrobarra'>('saude');
   const [showPhysicalAssessment, setShowPhysicalAssessment] = useState(false);
   const [isDiaDeTreino, setIsDiaDeTreino] = useState(() => {
     const day = new Date().getDay();
@@ -251,6 +252,21 @@ const App = () => {
       water: '47.8', waterWeight: '46.5', visceralFat: '15.0', boneMass: '4.95',
       metabolism: '1763.0', protein: '12.8', obesityLevel: '139.0', metabolicAge: '46.0',
       lbm: '64.2', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
+      fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
+    },
+    {
+      id: 13, date: '2026/06/07', time: '16:11:00',
+      weight: '98.9', weightStatus: 'Obeso', bmi: '30.5', bodyFat: '34.5', fatWeight: '34.1',
+      skeletalMuscle: '36.8', skeletalMuscleWeight: '36.1', muscleRate: '36.8', muscleWeight: '36.1',
+      water: '47.6', waterWeight: '46.8', visceralFat: '15.0', boneMass: '4.95',
+      metabolism: '1763.0', protein: '12.8', obesityLevel: '139.0', metabolicAge: '46.0',
+      lbm: '64.3', realAge: '36', height: '180',
       skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
       chest: '---', waist: '---', abdomen: '---', hip: '---',
       thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
@@ -1002,6 +1018,7 @@ const App = () => {
       <div className="w-full max-w-xl md:max-w-4xl lg:max-w-7xl xl:max-w-[1550px] mx-auto space-y-6 pt-4 px-3 md:px-4">
         {activeTab === 'exercicios' && <ExerciseTracker currentUser={currentUser} />}
         {activeTab === 'poviztra' && <PoviztraControl currentUser={currentUser} />}
+        {activeTab === 'nutrobarra' && <NutrobarraMetrics currentUser={currentUser} />}
         {activeTab === 'saude' && (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24 items-start">
             <div className="space-y-6">
@@ -1968,6 +1985,14 @@ const App = () => {
           >
             <Activity className="w-6 h-6" />
             <span className="text-[10px] font-black uppercase tracking-widest px-1">Saúde</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('nutrobarra')}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'nutrobarra' ? 'text-red-600' : 'text-white'} flex-1`}
+          >
+            <ClipboardList className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Nutrobarra</span>
           </button>
 
 
