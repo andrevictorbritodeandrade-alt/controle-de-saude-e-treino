@@ -1,8 +1,10 @@
 {
-  "name": "Controle de Saúde e Treinos",
-  "description": "A personalized diet and hydration tracker with meal scheduling and macro monitoring.",
+  "name": "Controle de Saúde",
+  "description": "A personalized diet, weight, and clinical bioimpedance tracker for health control.",
   "requestFramePermissions": [
     "camera"
   ],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

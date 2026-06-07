@@ -971,7 +971,7 @@ const App = () => {
               <div>
                 <h1 className="text-lg sm:text-xl font-[1000] text-white tracking-[-0.08em] font-montserrat uppercase flex flex-wrap gap-1">
                   <span>CONTROLE DE</span>
-                  <span className="text-red-600">SAÚDE & TREINO</span>
+                  <span className="text-red-600">SAÚDE</span>
                 </h1>
                 <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
                   <Calendar className="w-4 h-4" />
