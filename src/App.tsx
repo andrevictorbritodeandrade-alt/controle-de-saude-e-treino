@@ -261,8 +261,8 @@ const App = () => {
       fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
     },
     {
-      id: 13, date: '2026/06/07', time: '16:11:00',
-      weight: '98.9', weightStatus: 'Obeso', bmi: '30.5', bodyFat: '34.5', fatWeight: '34.1',
+      id: 14, date: '2026/06/11', time: '06:04:00',
+      weight: '98.1', weightStatus: 'Obeso', bmi: '30.3', bodyFat: '34.2', fatWeight: '33.5',
       skeletalMuscle: '36.8', skeletalMuscleWeight: '36.1', muscleRate: '36.8', muscleWeight: '36.1',
       water: '47.6', waterWeight: '46.8', visceralFat: '15.0', boneMass: '4.95',
       metabolism: '1763.0', protein: '12.8', obesityLevel: '139.0', metabolicAge: '46.0',
