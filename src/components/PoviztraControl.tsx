@@ -97,6 +97,14 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           { date: '30/05/2026', checkStr: '30/05/2026' },
           { date: '01/06/2026', checkStr: '01/06/2026' },
           { date: '02/06/2026', checkStr: '02/06/2026' },
+          { date: '03/06/2026', checkStr: '03/06/2026' },
+          { date: '04/06/2026', checkStr: '04/06/2026' },
+          { date: '05/06/2026', checkStr: '05/06/2026' },
+          { date: '06/06/2026', checkStr: '06/06/2026' },
+          { date: '08/06/2026', checkStr: '08/06/2026' },
+          { date: '09/06/2026', checkStr: '09/06/2026' },
+          { date: '10/06/2026', checkStr: '10/06/2026' },
+          { date: '11/06/2026', checkStr: '11/06/2026' },
         ];
 
         let historyChanged = false;
