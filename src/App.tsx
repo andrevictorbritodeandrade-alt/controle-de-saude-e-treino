@@ -274,6 +274,21 @@ const App = () => {
       forearmRight: '---', forearmLeft: '---',
       leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
       fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
+    },
+    {
+      id: 15, date: '2026/06/18', time: '15:38:00',
+      weight: '97.6', weightStatus: 'Obeso', bmi: '30.1', bodyFat: '34.0', fatWeight: '33.2',
+      skeletalMuscle: '36.8', skeletalMuscleWeight: '36.1', muscleRate: '36.8', muscleWeight: '36.1',
+      water: '47.7', waterWeight: '46.6', visceralFat: '15.0', boneMass: '4.95',
+      metabolism: '1763.0', protein: '12.8', obesityLevel: '139.0', metabolicAge: '46.0',
+      lbm: '64.4', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
+      fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
     }
   ]);
   

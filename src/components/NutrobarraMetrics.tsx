@@ -156,6 +156,34 @@ const INITIAL_CLINICAL_DATA: Assessment[] = [
     fatTrunk: 17.6,
     fatLegLeft: 5.1,
     fatLegRight: 5.1
+  },
+  {
+    id: 6,
+    date: '18/06/2026',
+    time: '15:38',
+    weight: 97.6,
+    bodyFat: 34.0,
+    fatWeight: 33.2,
+    skeletalMuscleWeight: 36.1,
+    waterWeight: 46.6,
+    protein: 12.8,
+    boneMass: 4.95,
+    metabolism: 1763,
+    bmi: 30.1,
+    visceralFat: 15,
+    obesityLevel: 139.0,
+    inbodyScore: 61,
+    whr: 0.95,
+    leanArmLeft: 3.50,
+    leanArmRight: 3.50,
+    leanTrunk: 27.8,
+    leanLegLeft: 10.01,
+    leanLegRight: 10.01,
+    fatArmLeft: 2.7,
+    fatArmRight: 2.7,
+    fatTrunk: 17.6,
+    fatLegLeft: 5.1,
+    fatLegRight: 5.1
   }
 ];
 
@@ -173,10 +201,13 @@ export const NutrobarraMetrics: React.FC<{ currentUser: UserType }> = ({ current
           if (index === -1) {
             merged.push(initItem);
           } else {
-            // Overwrite weight to 98.9 to force today's weight update accurately
-            if (initItem.date === '07/06/2026') {
-              merged[index].weight = initItem.weight;
-            }
+            // Overwrite weight and other metrics to force the latest status update accurately
+            merged[index].weight = initItem.weight;
+            merged[index].bodyFat = initItem.bodyFat;
+            merged[index].fatWeight = initItem.fatWeight;
+            merged[index].skeletalMuscleWeight = initItem.skeletalMuscleWeight;
+            merged[index].waterWeight = initItem.waterWeight;
+            merged[index].bmi = initItem.bmi;
           }
         });
 
