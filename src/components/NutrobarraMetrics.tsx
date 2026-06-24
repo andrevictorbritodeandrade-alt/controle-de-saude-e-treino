@@ -184,6 +184,34 @@ const INITIAL_CLINICAL_DATA: Assessment[] = [
     fatTrunk: 17.6,
     fatLegLeft: 5.1,
     fatLegRight: 5.1
+  },
+  {
+    id: 7,
+    date: '23/06/2026',
+    time: '18:10',
+    weight: 97.0,
+    bodyFat: 33.8,
+    fatWeight: 32.8,
+    skeletalMuscleWeight: 36.1,
+    waterWeight: 46.4,
+    protein: 12.8,
+    boneMass: 4.95,
+    metabolism: 1763,
+    bmi: 29.9,
+    visceralFat: 15,
+    obesityLevel: 139.0,
+    inbodyScore: 62,
+    whr: 0.95,
+    leanArmLeft: 3.50,
+    leanArmRight: 3.50,
+    leanTrunk: 27.8,
+    leanLegLeft: 10.01,
+    leanLegRight: 10.01,
+    fatArmLeft: 2.7,
+    fatArmRight: 2.7,
+    fatTrunk: 17.6,
+    fatLegLeft: 5.1,
+    fatLegRight: 5.1
   }
 ];
 
