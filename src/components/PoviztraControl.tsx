@@ -105,6 +105,23 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           { date: '09/06/2026', checkStr: '09/06/2026' },
           { date: '10/06/2026', checkStr: '10/06/2026' },
           { date: '11/06/2026', checkStr: '11/06/2026' },
+          { date: '12/06/2026', checkStr: '12/06/2026' },
+          { date: '13/06/2026', checkStr: '13/06/2026' },
+          { date: '15/06/2026', checkStr: '15/06/2026' },
+          { date: '16/06/2026', checkStr: '16/06/2026' },
+          { date: '17/06/2026', checkStr: '17/06/2026' },
+          { date: '18/06/2026', checkStr: '18/06/2026' },
+          { date: '19/06/2026', checkStr: '19/06/2026' },
+          { date: '20/06/2026', checkStr: '20/06/2026' },
+          { date: '22/06/2026', checkStr: '22/06/2026' },
+          { date: '23/06/2026', checkStr: '23/06/2026' },
+          { date: '24/06/2026', checkStr: '24/06/2026' },
+          { date: '25/06/2026', checkStr: '25/06/2026' },
+          { date: '26/06/2026', checkStr: '26/06/2026' },
+          { date: '27/06/2026', checkStr: '27/06/2026' },
+          { date: '29/06/2026', checkStr: '29/06/2026' },
+          { date: '30/06/2026', checkStr: '30/06/2026' },
+          { date: '01/07/2026', checkStr: '01/07/2026' },
         ];
 
         let historyChanged = false;
@@ -536,7 +553,7 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="text-[9px] uppercase font-black text-gray-500">Próxima</p>
-                    <p className="font-black text-lg text-gray-100 tracking-tight">{vitamins[key].nextDose ? vitamins[key].nextDose.toLocaleDateString('pt-BR') : '--/--/--'}</p>
+                    <p className="font-black text-lg text-gray-100 tracking-tight">{vitamins[key].nextDose ? new Date(vitamins[key].nextDose).toLocaleDateString('pt-BR') : '--/--/--'}</p>
                   </div>
                   <button 
                     onClick={() => takeVitamin(key)} 

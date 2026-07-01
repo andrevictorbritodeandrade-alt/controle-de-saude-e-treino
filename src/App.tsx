@@ -38,6 +38,7 @@ import { ExerciseTracker } from './components/ExerciseTracker';
 import { WeightMetrics } from './components/WeightMetrics';
 import { GlicemiaMetrics } from './components/GlicemiaMetrics';
 import PhysicalAssessment from './components/PhysicalAssessment';
+import BloodExams from './components/BloodExams';
 import { PoviztraControl } from './components/PoviztraControl';
 import { NutrobarraMetrics } from './components/NutrobarraMetrics';
 import { motion } from 'motion/react';
@@ -86,8 +87,9 @@ const App = () => {
     }
   }, []);
 
-  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'poviztra' | 'diario' | 'historico' | 'nutrobarra'>('saude');
+  const [activeTab, setActiveTab] = useState<'saude' | 'exercicios' | 'poviztra' | 'diario' | 'historico' | 'nutrobarra' | 'exames'>('saude');
   const [showPhysicalAssessment, setShowPhysicalAssessment] = useState(false);
+  const [showBloodExams, setShowBloodExams] = useState(false);
   const [isDiaDeTreino, setIsDiaDeTreino] = useState(() => {
     const day = new Date().getDay();
     // 0: Domingo, 1: Segunda, 2: Terça, 3: Quarta, 4: Quinta, 5: Sexta, 6: Sábado
@@ -1049,6 +1051,7 @@ const App = () => {
         {activeTab === 'exercicios' && <ExerciseTracker currentUser={currentUser} />}
         {activeTab === 'poviztra' && <PoviztraControl currentUser={currentUser} />}
         {activeTab === 'nutrobarra' && <NutrobarraMetrics currentUser={currentUser} />}
+        {activeTab === 'exames' && <BloodExams />}
         {activeTab === 'saude' && (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24 items-start">
             <div className="space-y-6">
@@ -1103,24 +1106,43 @@ const App = () => {
                 </div>
               </div>
 
-              {/* CARD DE AVALIAÇÃO FÍSICA */}
-              <div 
-                onClick={() => setShowPhysicalAssessment(true)}
-                className="mb-10 bg-gradient-to-br from-red-600 to-red-800 p-6 rounded-[2rem] shadow-lg shadow-red-900/20 cursor-pointer hover:scale-[1.02] transition-transform relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-                <div className="flex justify-between items-center relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white backdrop-blur-sm">
-                      <UserIcon className="w-6 h-6" />
+              {/* CARD DE AVALIAÇÃO FÍSICA E EXAMES */}
+              <div className="grid grid-cols-2 gap-4 mb-10">
+                {/* CARD DE AVALIAÇÃO FÍSICA */}
+                <div 
+                  onClick={() => setShowPhysicalAssessment(true)}
+                  className="bg-gradient-to-br from-red-600 to-red-800 p-6 rounded-[2rem] shadow-lg shadow-red-900/20 cursor-pointer hover:scale-[1.02] transition-transform relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                  <div className="flex flex-col relative z-10 h-full justify-between">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white backdrop-blur-sm">
+                        <UserIcon className="w-6 h-6" />
+                      </div>
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">Avaliação Física</h3>
                       <p className="text-[10px] font-bold text-red-100 uppercase">Bioimpedância & Métricas</p>
                     </div>
                   </div>
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-sm">
-                    <ChevronRight className="w-5 h-5" />
+                </div>
+
+                {/* CARD DE EXAMES DE SANGUE */}
+                <div 
+                  onClick={() => setShowBloodExams(true)}
+                  className="bg-[#1c1c1c] p-6 rounded-[2rem] border border-[#2a2a2a] shadow-lg cursor-pointer hover:scale-[1.02] transition-transform relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                  <div className="flex flex-col relative z-10 h-full justify-between">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 bg-red-500/20 rounded-2xl flex items-center justify-center text-red-500 backdrop-blur-sm border border-red-500/20">
+                        <Droplets className="w-6 h-6" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">Exames de Sangue</h3>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">Resultados & Comparativos</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2018,6 +2040,14 @@ const App = () => {
           </button>
 
           <button 
+            onClick={() => setActiveTab('exames')}
+            className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'exames' ? 'text-red-600' : 'text-white'} flex-1`}
+          >
+            <Droplets className="w-6 h-6" />
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Exames</span>
+          </button>
+
+          <button 
             onClick={() => setActiveTab('nutrobarra')}
             className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'nutrobarra' ? 'text-red-600' : 'text-white'} flex-1`}
           >
@@ -2036,6 +2066,11 @@ const App = () => {
           onSave={(data) => setBioimpedanceAssessments(prev => [...prev, data])}
           onClose={() => setShowPhysicalAssessment(false)} 
         />
+      )}
+
+      {/* MODAL DE EXAMES DE SANGUE */}
+      {showBloodExams && (
+        <BloodExams onClose={() => setShowBloodExams(false)} />
       )}
     </div>
   );
