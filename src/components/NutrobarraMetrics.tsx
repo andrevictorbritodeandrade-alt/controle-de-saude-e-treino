@@ -212,6 +212,62 @@ const INITIAL_CLINICAL_DATA: Assessment[] = [
     fatTrunk: 17.6,
     fatLegLeft: 5.1,
     fatLegRight: 5.1
+  },
+  {
+    id: 8,
+    date: '06/07/2026',
+    time: '14:28',
+    weight: 99.3,
+    bodyFat: 33.7,
+    fatWeight: 33.4,
+    skeletalMuscleWeight: 37.0,
+    waterWeight: 47.9,
+    protein: 12.9,
+    boneMass: 5.06,
+    metabolism: 1792,
+    bmi: 30.6,
+    visceralFat: 14,
+    obesityLevel: 139.0,
+    inbodyScore: 63,
+    whr: 0.94,
+    leanArmLeft: 3.50,
+    leanArmRight: 3.50,
+    leanTrunk: 28.1,
+    leanLegLeft: 10.21,
+    leanLegRight: 10.21,
+    fatArmLeft: 2.6,
+    fatArmRight: 2.6,
+    fatTrunk: 17.0,
+    fatLegLeft: 5.0,
+    fatLegRight: 5.0
+  },
+  {
+    id: 9,
+    date: '07/07/2026',
+    time: '08:39',
+    weight: 97.3,
+    bodyFat: 33.7,
+    fatWeight: 32.8,
+    skeletalMuscleWeight: 37.0,
+    waterWeight: 47.9,
+    protein: 12.9,
+    boneMass: 5.06,
+    metabolism: 1792,
+    bmi: 30.0,
+    visceralFat: 14,
+    obesityLevel: 136.0,
+    inbodyScore: 64,
+    whr: 0.94,
+    leanArmLeft: 3.50,
+    leanArmRight: 3.50,
+    leanTrunk: 28.1,
+    leanLegLeft: 10.21,
+    leanLegRight: 10.21,
+    fatArmLeft: 2.6,
+    fatArmRight: 2.6,
+    fatTrunk: 17.0,
+    fatLegLeft: 5.0,
+    fatLegRight: 5.0
   }
 ];
 
@@ -260,8 +316,8 @@ export const NutrobarraMetrics: React.FC<{ currentUser: UserType }> = ({ current
   const [showAddSuccess, setShowAddSuccess] = useState(false);
 
   // Optimizer sliders and states
-  const [simulatedMuscle, setSimulatedMuscle] = useState<number>(36.3);
-  const [simulatedFat, setSimulatedFat] = useState<number>(34.6);
+  const [simulatedMuscle, setSimulatedMuscle] = useState<number>(37.0);
+  const [simulatedFat, setSimulatedFat] = useState<number>(32.8);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState<boolean>(false);
   const [aiPlan, setAiPlan] = useState<string>('');
 

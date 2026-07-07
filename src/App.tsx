@@ -306,6 +306,36 @@ const App = () => {
       forearmRight: '---', forearmLeft: '---',
       leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '27.8', leanLegLeft: '10.01', leanLegRight: '10.01',
       fatArmLeft: '2.7', fatArmRight: '2.7', fatTrunk: '17.6', fatLegLeft: '5.1', fatLegRight: '5.1'
+    },
+    {
+      id: 17, date: '2026/07/06', time: '14:28:00',
+      weight: '99.3', weightStatus: 'Obeso', bmi: '30.6', bodyFat: '33.7', fatWeight: '33.4',
+      skeletalMuscle: '37.0', skeletalMuscleWeight: '37.0', muscleRate: '37.0', muscleWeight: '37.0',
+      water: '48.2', waterWeight: '47.9', visceralFat: '14.0', boneMass: '5.06',
+      metabolism: '1792.0', protein: '12.9', obesityLevel: '139.0', metabolicAge: '46.0',
+      lbm: '65.9', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '28.1', leanLegLeft: '10.21', leanLegRight: '10.21',
+      fatArmLeft: '2.6', fatArmRight: '2.6', fatTrunk: '17.0', fatLegLeft: '5.0', fatLegRight: '5.0'
+    },
+    {
+      id: 18, date: '2026/07/07', time: '08:39:46',
+      weight: '97.3', weightStatus: 'Obeso', bmi: '30.0', bodyFat: '33.7', fatWeight: '32.8',
+      skeletalMuscle: '37.0', skeletalMuscleWeight: '37.0', muscleRate: '37.0', muscleWeight: '37.0',
+      water: '48.2', waterWeight: '47.9', visceralFat: '14.0', boneMass: '5.06',
+      metabolism: '1792.0', protein: '12.9', obesityLevel: '136.0', metabolicAge: '46.0',
+      lbm: '64.5', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '28.1', leanLegLeft: '10.21', leanLegRight: '10.21',
+      fatArmLeft: '2.6', fatArmRight: '2.6', fatTrunk: '17.0', fatLegLeft: '5.0', fatLegRight: '5.0'
     }
   ]);
   
