@@ -41,6 +41,7 @@ import PhysicalAssessment from './components/PhysicalAssessment';
 import BloodExams from './components/BloodExams';
 import { PoviztraControl } from './components/PoviztraControl';
 import { NutrobarraMetrics } from './components/NutrobarraMetrics';
+import { MedicationTracker } from './components/MedicationTracker';
 import { motion } from 'motion/react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { 
@@ -1083,36 +1084,15 @@ const App = () => {
         {activeTab === 'nutrobarra' && <NutrobarraMetrics currentUser={currentUser} />}
         {activeTab === 'exames' && <BloodExams />}
         {activeTab === 'saude' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24 items-start">
-            <div className="space-y-6">
-              <WeightMetrics 
-                currentUser={currentUser} 
-                assessments={bioimpedanceAssessments} 
-                onSaveAssessments={setBioimpedanceAssessments} 
-              />
-              
-              {/* SEÇÃO DE MEDICAÇÕES (DESLOCADA PARA COLUNA DE PESO) */}
-              <div className="bg-[#121212] border border-[#1f1f1f] rounded-[2rem] p-6 shadow-xl">
-                <h3 className="text-xs font-black uppercase tracking-wider font-montserrat mb-4 text-white">Medicações e Vitaminas</h3>
-                <div className="space-y-3">
-                  {[
-                    { name: 'Bup (Bupropiona) 150mg XL', dosage: '150mg', frequency: '2x ao dia' },
-                    { name: 'Topiramato', dosage: '100mg', frequency: '2x ao dia' },
-                    { name: 'Sertralina', dosage: '50mg', frequency: '2x ao dia' },
-                    { name: 'Venvanse (Genérico)', dosage: '30mg', frequency: '1x ao dia' },
-                    { name: 'Vitaminas Bariátrica', dosage: '-', frequency: '2x ao dia' },
-                  ].map((med, i) => (
-                    <div key={i} className="flex justify-between items-center p-3 bg-black/40 rounded-xl border border-[#222]">
-                      <div>
-                        <p className="text-xs font-bold text-white">{med.name}</p>
-                        <p className="text-[10px] text-gray-500 font-bold">{med.dosage}</p>
-                      </div>
-                      <span className="text-[9px] font-black uppercase tracking-wider text-red-500 bg-red-950/30 border border-red-500/20 px-2.5 py-0.5 rounded-md shrink-0">{med.frequency}</span>
-                    </div>
-                  ))}
-                </div>
+          <div className="space-y-6 pb-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+              <div className="space-y-6">
+                <WeightMetrics 
+                  currentUser={currentUser} 
+                  assessments={bioimpedanceAssessments} 
+                  onSaveAssessments={setBioimpedanceAssessments} 
+                />
               </div>
-            </div>
             
             <div className="space-y-6">
               <GlicemiaMetrics currentUser={currentUser} />
@@ -1329,7 +1309,11 @@ const App = () => {
 
           </div>
         </div>
-        )}
+        
+        {/* SEÇÃO DE MEDICAÇÕES DINÂMICA (FULL-WIDTH) */}
+        <MedicationTracker currentUser={currentUser} />
+      </div>
+      )}
 
         {/* INPUT DE IA - GLOBAL */}
         {activeTab === 'diario' && (
