@@ -29,6 +29,7 @@ export const initialData: ProgressEntry[] = [
   { date: '19/05', weight: 99, muscleMass: 38.0, bodyFat: 28.5 },
   { date: '20/05', weight: 98.7, muscleMass: 37.2, bodyFat: 29.5 },
   { date: '26/05', weight: 98.6, muscleMass: 37.2, bodyFat: 29.5 },
+  { date: '28/09', weight: 103.6, muscleMass: 36.8, bodyFat: 35.0 },
 ];
 
 export const WeightMetrics: React.FC<{ 

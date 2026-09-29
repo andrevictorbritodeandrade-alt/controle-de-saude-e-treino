@@ -42,6 +42,7 @@ import BloodExams from './components/BloodExams';
 import { PoviztraControl } from './components/PoviztraControl';
 import { NutrobarraMetrics } from './components/NutrobarraMetrics';
 import { MedicationTracker } from './components/MedicationTracker';
+import { PWAInstallButton } from './components/PWAInstallButton';
 import { motion } from 'motion/react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { 
@@ -330,6 +331,21 @@ const App = () => {
       water: '48.2', waterWeight: '47.9', visceralFat: '14.0', boneMass: '5.06',
       metabolism: '1792.0', protein: '12.9', obesityLevel: '136.0', metabolicAge: '46.0',
       lbm: '64.5', realAge: '36', height: '180',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '28.1', leanLegLeft: '10.21', leanLegRight: '10.21',
+      fatArmLeft: '2.6', fatArmRight: '2.6', fatTrunk: '17.0', fatLegLeft: '5.0', fatLegRight: '5.0'
+    },
+    {
+      id: 19, date: '2026/09/28', time: '10:00:00',
+      weight: '103.6', weightStatus: 'Obeso', bmi: '32.0', bodyFat: '35.0', fatWeight: '36.3',
+      skeletalMuscle: '36.8', skeletalMuscleWeight: '36.0', muscleRate: '36.8', muscleWeight: '36.0',
+      water: '47.5', waterWeight: '49.2', visceralFat: '15.0', boneMass: '5.0',
+      metabolism: '1800.0', protein: '13.0', obesityLevel: '144.0', metabolicAge: '46.0',
+      lbm: '67.3', realAge: '36', height: '180',
       skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
       chest: '---', waist: '---', abdomen: '---', hip: '---',
       thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
@@ -1044,6 +1060,7 @@ const App = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <PWAInstallButton />
               <button 
                 onClick={toggleNotifications}
                 className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 transition-transform ${
@@ -2042,7 +2059,7 @@ const App = () => {
             className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'poviztra' ? 'text-red-600' : 'text-white'} flex-1`}
           >
             <Syringe className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-widest px-1">Poviztra</span>
+            <span className="text-[10px] font-black uppercase tracking-widest px-1">Caneta</span>
           </button>
 
           <button 

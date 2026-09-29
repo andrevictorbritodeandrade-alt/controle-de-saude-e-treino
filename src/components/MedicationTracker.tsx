@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Pill, 
+  Syringe,
   Calendar, 
   Plus, 
   Trash2, 
@@ -9,9 +10,11 @@ import {
   Check, 
   AlertTriangle, 
   CheckCircle, 
+  XCircle,
   ShoppingBag, 
   ArrowRight,
-  Info
+  Info,
+  Clock
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -32,6 +35,8 @@ interface Medication {
   dailyDosage: number;
   currentStock: number;
   frequency: string;
+  isPen?: boolean;
+  unitLabel?: string;
 }
 
 interface Purchase {
@@ -42,21 +47,56 @@ interface Purchase {
   pricePaid: number;
 }
 
+interface OzivyLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  units: number;
+  status: 'applied' | 'skipped';
+  label: string;
+}
+
 export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
-  // 1. Core Medications State (Pre-seeded with user's specific values)
+  // 1. Core Medications State (Pre-seeded with user's specific values including Caneta Ozivy)
   const [medications, setMedications] = useState<Medication[]>(() => {
-    const saved = localStorage.getItem('user_medications_v3');
+    const saved = localStorage.getItem('user_medications_v4');
     if (saved) return JSON.parse(saved);
     return [
       { id: '1', name: 'Bup (Bupropiona) 150mg XL', dosage: '150mg', dailyDosage: 2, currentStock: 30, frequency: '2x ao dia (Manhã e Noite)' },
       { id: '2', name: 'Topiramato', dosage: '100mg', dailyDosage: 2, currentStock: 8, frequency: '2x ao dia (Manhã e Noite)' },
-      { id: '3', name: 'Sertralina', dosage: '50mg', dailyDosage: 2, currentStock: 38, frequency: '2x ao dia (Manhã e Noite)' }
+      { id: '3', name: 'Sertralina', dosage: '50mg', dailyDosage: 2, currentStock: 38, frequency: '2x ao dia (Manhã e Noite)' },
+      { id: '4', name: 'Caneta Ozivy', dosage: '25 UI', dailyDosage: 7.14, currentStock: 100, frequency: '25 UI (Segunda e Quinta)', isPen: true, unitLabel: 'UI' }
     ];
   });
 
-  // 2. Purchases History State (Pre-seeded with realistic values for linear evolution chart)
+  // 2. Ozivy Dose Application History Log
+  const [ozivyLogs, setOzivyLogs] = useState<OzivyLog[]>(() => {
+    const saved = localStorage.getItem('user_ozivy_logs_v1');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 'oz_6', date: '2026-07-30', units: 25, status: 'applied', label: 'Hoje (Quinta-feira)' },
+      { id: 'oz_5', date: '2026-07-27', units: 25, status: 'applied', label: 'Segunda-feira passada' },
+      { id: 'oz_4', date: '2026-07-23', units: 25, status: 'applied', label: 'Quinta-feira (23/07)' },
+      { id: 'oz_3', date: '2026-07-20', units: 0, status: 'skipped', label: 'Segunda-feira (20/07) - Não tomou' },
+      { id: 'oz_2', date: '2026-07-16', units: 0, status: 'skipped', label: 'Quinta-feira (16/07) - Não tomou' },
+      { id: 'oz_1', date: '2026-07-13', units: 25, status: 'applied', label: 'Segunda-feira (13/07)' }
+    ];
+  });
+
+  // Pen Total Capacity (Standard 200 UI pen, or adjustable)
+  const [penTotalCapacity, setPenTotalCapacity] = useState<number>(() => {
+    const saved = localStorage.getItem('user_ozivy_pen_capacity');
+    return saved ? JSON.parse(saved) : 200;
+  });
+
+  // Form states for new Ozivy application
+  const [newOzivyDate, setNewOzivyDate] = useState<string>('2026-07-30');
+  const [newOzivyUnits, setNewOzivyUnits] = useState<number>(25);
+  const [newOzivyStatus, setNewOzivyStatus] = useState<'applied' | 'skipped'>('applied');
+  const [showOzivyModal, setShowOzivyModal] = useState<boolean>(false);
+
+  // 3. Purchases History State
   const [purchases, setPurchases] = useState<Purchase[]>(() => {
-    const saved = localStorage.getItem('user_medication_purchases_v3');
+    const saved = localStorage.getItem('user_medication_purchases_v4');
     if (saved) return JSON.parse(saved);
     return [
       // Jan/2026
@@ -88,23 +128,69 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
       { id: 'p21', date: '2026-06-22', medName: 'Bup (Bupropiona) 150mg XL', quantity: 60, pricePaid: 142.00 },
       { id: 'p22', date: '2026-06-22', medName: 'Topiramato', quantity: 60, pricePaid: 89.00 },
       { id: 'p23', date: '2026-06-22', medName: 'Sertralina', quantity: 60, pricePaid: 69.00 },
+
+      // Jul/2026
+      { id: 'p24', date: '2026-07-10', medName: 'Caneta Ozivy', quantity: 200, pricePaid: 420.00 }
     ];
   });
 
   // Save changes to localStorage
   useEffect(() => {
-    localStorage.setItem('user_medications_v3', JSON.stringify(medications));
+    localStorage.setItem('user_medications_v4', JSON.stringify(medications));
   }, [medications]);
 
   useEffect(() => {
-    localStorage.setItem('user_medication_purchases_v3', JSON.stringify(purchases));
+    localStorage.setItem('user_ozivy_logs_v1', JSON.stringify(ozivyLogs));
+  }, [ozivyLogs]);
+
+  useEffect(() => {
+    localStorage.setItem('user_ozivy_pen_capacity', JSON.stringify(penTotalCapacity));
+  }, [penTotalCapacity]);
+
+  useEffect(() => {
+    localStorage.setItem('user_medication_purchases_v4', JSON.stringify(purchases));
   }, [purchases]);
+
+  // Total Ozivy Units Used
+  const totalOzivyUnitsUsed = ozivyLogs.reduce((sum, log) => sum + (log.status === 'applied' ? log.units : 0), 0);
+  const remainingOzivyUnits = Math.max(0, penTotalCapacity - totalOzivyUnitsUsed);
+
+  // Sync Ozivy stock in medications list
+  useEffect(() => {
+    setMedications(prev => prev.map(m => {
+      if (m.name.toLowerCase().includes('ozivy')) {
+        return { ...m, currentStock: remainingOzivyUnits };
+      }
+      return m;
+    }));
+  }, [remainingOzivyUnits]);
+
+  // Add Ozivy application
+  const handleAddOzivyLog = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newLog: OzivyLog = {
+      id: 'oz_' + Date.now(),
+      date: newOzivyDate,
+      units: newOzivyStatus === 'applied' ? Number(newOzivyUnits) : 0,
+      status: newOzivyStatus,
+      label: newOzivyStatus === 'applied' ? `Aplicação de ${newOzivyUnits} UI` : 'Aplicação Não Realizada'
+    };
+
+    setOzivyLogs(prev => [newLog, ...prev]);
+    setShowOzivyModal(false);
+  };
+
+  const handleDeleteOzivyLog = (id: string) => {
+    if (confirm('Deseja remover este registro de aplicação?')) {
+      setOzivyLogs(prev => prev.filter(l => l.id !== id));
+    }
+  };
 
   // Form states for register purchase
   const [selectedMedId, setSelectedMedId] = useState<string>(medications[0]?.id || '');
   const [purchaseQty, setPurchaseQty] = useState<number>(30);
   const [purchasePrice, setPurchasePrice] = useState<number>(100);
-  const [purchaseDate, setPurchaseDate] = useState<string>('2026-07-07');
+  const [purchaseDate, setPurchaseDate] = useState<string>('2026-07-30');
   const [showPurchaseForm, setShowPurchaseForm] = useState<boolean>(false);
 
   // States for adding a new medicine to tracker
@@ -115,18 +201,21 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
   const [newMedFrequency, setNewMedFrequency] = useState('');
   const [showNewMedForm, setShowNewMedForm] = useState(false);
 
-  // Take today's doses (decrements all active stocks by daily dosage)
+  // Take today's oral doses
   const [takenToday, setTakenToday] = useState<boolean>(false);
   const handleTakeDoses = () => {
     if (takenToday) return;
     setMedications(prev => 
-      prev.map(med => ({
-        ...med,
-        currentStock: Math.max(0, med.currentStock - med.dailyDosage)
-      }))
+      prev.map(med => {
+        if (med.isPen) return med; // Pens tracked separately
+        return {
+          ...med,
+          currentStock: Math.max(0, med.currentStock - med.dailyDosage)
+        };
+      })
     );
     setTakenToday(true);
-    setTimeout(() => setTakenToday(false), 5000); // Reset visual feedback after 5s
+    setTimeout(() => setTakenToday(false), 5000);
   };
 
   // Register purchase handler
@@ -143,15 +232,12 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
       pricePaid: Number(purchasePrice)
     };
 
-    // Update purchases history
     setPurchases(prev => [newPurchase, ...prev]);
 
-    // Update medication stock
     setMedications(prev => 
       prev.map(m => m.id === selectedMedId ? { ...m, currentStock: m.currentStock + Number(purchaseQty) } : m)
     );
 
-    // Reset fields & show success
     setShowPurchaseForm(false);
   };
 
@@ -190,7 +276,6 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
     }
   };
 
-  // Helper to format date
   const formatDateBR = (dateStr: string) => {
     const parts = dateStr.split('-');
     if (parts.length === 3) {
@@ -199,14 +284,12 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
     return dateStr;
   };
 
-  // Calculations for remaining days and purchase dates
   const calculateDepletionInfo = (med: Medication) => {
     if (med.dailyDosage <= 0) return { daysLeft: Infinity, dateStr: 'N/A', status: 'Estável' as const };
     
     const daysLeft = Math.floor(med.currentStock / med.dailyDosage);
     
-    // Calculate depletion date starting from 2026-07-07 (or today)
-    const baseDate = new Date('2026-07-07');
+    const baseDate = new Date('2026-07-30');
     baseDate.setDate(baseDate.getDate() + daysLeft);
     
     const day = String(baseDate.getDate()).padStart(2, '0');
@@ -221,19 +304,16 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
     return { daysLeft, dateStr, status };
   };
 
-  // Prepare chart data for linear cost evolution by month
   const getChartData = () => {
     const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const monthlyTotals: { [key: string]: number } = {};
 
-    // Initialize months of the year
-    for (let i = 0; i < 7; i++) { // Jan to Jul
+    for (let i = 0; i < 7; i++) {
       monthlyTotals[`2026-0${i + 1}`] = 0;
     }
 
-    // Accumulate purchase prices
     purchases.forEach(p => {
-      const yearMonth = p.date.substring(0, 7); // "YYYY-MM"
+      const yearMonth = p.date.substring(0, 7);
       if (monthlyTotals[yearMonth] !== undefined) {
         monthlyTotals[yearMonth] += p.pricePaid;
       } else if (p.date.startsWith('2026')) {
@@ -269,11 +349,11 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
           </div>
           <div>
             <h3 className="text-lg font-black text-white uppercase tracking-tight font-montserrat">Estoque e Gastos de Medicamentos</h3>
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Acompanhamento e Previsão de Recompra</p>
+            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Acompanhamento, Caneta Ozivy e Previsão de Recompra</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleTakeDoses}
             disabled={takenToday}
@@ -284,7 +364,15 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
             }`}
           >
             {takenToday ? <CheckCircle className="w-4 h-4" /> : <Check className="w-4 h-4" />}
-            {takenToday ? 'Doses do Dia Tomadas' : 'Marcar Doses de Hoje'}
+            {takenToday ? 'Doses Comprimidos Tomadas' : 'Tomar Comprimidos do Dia'}
+          </button>
+
+          <button
+            onClick={() => setShowOzivyModal(true)}
+            className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-red-950/40 active:scale-95"
+          >
+            <Syringe className="w-4 h-4" />
+            <span>Registrar Caneta Ozivy</span>
           </button>
 
           <button
@@ -300,7 +388,163 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
         </div>
       </div>
 
-      {/* 3. Alerts Section for depletion warnings */}
+      {/* DEDICATED CANETA OZIVY SECTION */}
+      <div className="bg-gradient-to-br from-[#1a1212] via-[#151515] to-[#121212] border border-red-500/20 rounded-2xl p-5 space-y-4 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2a1d1d] pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-red-950/60 border border-red-500/30 rounded-xl text-red-400">
+              <Syringe className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-base font-black text-white uppercase tracking-wide font-montserrat">Caneta Ozivy</h4>
+                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-black rounded-md uppercase">Dose Atual: 25 UI</span>
+              </div>
+              <p className="text-xs text-gray-400 font-medium mt-0.5">
+                Aplicação prescrita: <span className="text-white font-bold">25 Unidades (UI)</span> • Frequência: <span className="text-white font-bold">Segunda e Quinta</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 bg-black/40 px-4 py-3 rounded-xl border border-[#2a2a2a]">
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 block">Capacidade da Caneta</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg font-black text-white font-mono">{remainingOzivyUnits}</span>
+                <span className="text-xs text-gray-400 font-bold">/ {penTotalCapacity} UI restantes</span>
+              </div>
+            </div>
+            <div className="h-8 w-px bg-[#2a2a2a]" />
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 block">Aplicações Restantes</span>
+              <span className="text-lg font-black text-emerald-400 font-mono">
+                ~{Math.floor(remainingOzivyUnits / 25)} doses
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Ozivy Application Timeline Log */}
+        <div>
+          <div className="flex justify-between items-center mb-3">
+            <h5 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-red-500" /> Histórico de Aplicações e Doses
+            </h5>
+            <span className="text-[10px] font-bold text-gray-500">Total Aplicado: <strong className="text-white font-mono">{totalOzivyUnitsUsed} UI</strong></span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+            {ozivyLogs.map(log => (
+              <div 
+                key={log.id} 
+                className={`p-3 rounded-xl border transition-all flex flex-col justify-between space-y-2 relative group ${
+                  log.status === 'applied' 
+                  ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' 
+                  : 'bg-red-950/20 border-red-900/30 text-red-400 opacity-80'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-mono font-black text-gray-300">{formatDateBR(log.date)}</span>
+                  <button
+                    onClick={() => handleDeleteOzivyLog(log.id)}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-500 hover:text-red-400 transition-opacity"
+                    title="Remover"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div>
+                  <p className="text-xs font-black text-white">{log.label}</p>
+                  <p className="text-[11px] font-bold mt-1 flex items-center gap-1">
+                    {log.status === 'applied' ? (
+                      <>
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span className="text-emerald-300">Tomei {log.units} UI</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                        <span className="text-red-400">Não tomou</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal / Form for Ozivy Application */}
+      {showOzivyModal && (
+        <form onSubmit={handleAddOzivyLog} className="bg-[#181818] border border-red-500/30 p-5 rounded-2xl space-y-4 animate-in slide-in-from-top-4 duration-200">
+          <div className="flex items-center justify-between border-b border-[#222] pb-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
+              <Syringe className="w-4 h-4" /> Registrar Aplicação de Caneta Ozivy
+            </h4>
+            <button 
+              type="button" 
+              onClick={() => setShowOzivyModal(false)}
+              className="text-gray-500 hover:text-white text-xs font-black"
+            >
+              FECHAR
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">Data da Aplicação</label>
+              <input
+                type="date"
+                value={newOzivyDate}
+                onChange={e => setNewOzivyDate(e.target.value)}
+                className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-bold"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">Status da Dose</label>
+              <select
+                value={newOzivyStatus}
+                onChange={e => setNewOzivyStatus(e.target.value as 'applied' | 'skipped')}
+                className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-bold"
+              >
+                <option value="applied">Tomei / Aplicado</option>
+                <option value="skipped">Não Tomei / Pulou</option>
+              </select>
+            </div>
+
+            {newOzivyStatus === 'applied' && (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">Unidades Aplicadas (UI)</label>
+                <input
+                  type="number"
+                  value={newOzivyUnits}
+                  onChange={e => setNewOzivyUnits(Number(e.target.value))}
+                  min="1"
+                  className="w-full bg-[#121212] border border-[#2a2a2a] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-bold font-mono"
+                  required
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-red-950"
+            >
+              Salvar Registro da Caneta
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Alerts Section for depletion warnings */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {medications.map(med => {
           const info = calculateDepletionInfo(med);
@@ -319,7 +563,7 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
               <div>
                 <h4 className="text-xs font-black uppercase tracking-wider mb-0.5">{med.name}</h4>
                 <p className="text-[11px] font-semibold leading-relaxed">
-                  Estoque crítico! Dura apenas mais <span className="font-black text-white">{info.daysLeft}</span> dias. Comprar até <span className="font-black underline text-white">{info.dateStr}</span>.
+                  Estoque crítico! Dura apenas mais <span className="font-black text-white">{info.daysLeft}</span> {med.isPen ? 'dias de uso' : 'dias'}. Comprar até <span className="font-black underline text-white">{info.dateStr}</span>.
                 </p>
               </div>
             </div>
@@ -487,11 +731,11 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
       {/* Medications and stocks grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left Side: Medications List (8 columns) */}
+        {/* Left Side: Medications List (7 columns) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex justify-between items-center mb-1">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-red-500" /> Detalhamento do Estoque Atual
+              <Info className="w-3.5 h-3.5 text-red-500" /> Detalhamento do Estoque Geral
             </h4>
             <button
               onClick={() => {
@@ -507,7 +751,8 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
           <div className="space-y-3">
             {medications.map(med => {
               const info = calculateDepletionInfo(med);
-              const progressPercentage = Math.min(100, (med.currentStock / 60) * 100); // 60 is full reference
+              const maxRef = med.isPen ? penTotalCapacity : 60;
+              const progressPercentage = Math.min(100, (med.currentStock / maxRef) * 100);
 
               let progColor = "bg-red-500";
               if (info.status === 'Estável') progColor = "bg-emerald-500";
@@ -517,8 +762,15 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
                 <div key={med.id} className="p-4 bg-black/40 border border-[#1f1f1f] rounded-2xl space-y-3 hover:border-red-500/10 transition-colors">
                   <div className="flex justify-between items-start gap-4">
                     <div>
-                      <h4 className="text-sm font-black text-white">{med.name}</h4>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{med.dosage !== '-' ? `${med.dosage} • ` : ''}{med.frequency}</p>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black text-white">{med.name}</h4>
+                        {med.isPen && (
+                          <span className="px-2 py-0.5 bg-red-950/60 text-red-400 border border-red-500/30 text-[9px] font-black rounded-md uppercase flex items-center gap-1">
+                            <Syringe className="w-3 h-3" /> Caneta
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">{med.dosage !== '-' ? `${med.dosage} • ` : ''}{med.frequency}</p>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
@@ -536,7 +788,9 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#151515] p-3 rounded-xl border border-[#222]">
                     <div className="flex flex-col">
                       <span className="text-[9px] font-black uppercase tracking-wider text-gray-500 leading-tight">Estoque Disponível</span>
-                      <span className="text-xs font-bold font-mono text-white mt-0.5">{med.currentStock} comprimidos</span>
+                      <span className="text-xs font-bold font-mono text-white mt-0.5">
+                        {med.currentStock} {med.isPen ? 'UI (Unidades)' : 'comprimidos'}
+                      </span>
                     </div>
 
                     <div className="flex flex-col">
@@ -561,7 +815,7 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
                   <div className="space-y-1">
                     <div className="flex justify-between text-[10px] font-bold text-gray-500">
                       <span>Nível do Estoque</span>
-                      <span>{med.currentStock} unidades</span>
+                      <span>{med.currentStock} {med.isPen ? 'UI' : 'unidades'}</span>
                     </div>
                     <div className="w-full bg-[#1f1f1f] h-2 rounded-full overflow-hidden">
                       <div className={`h-full ${progColor} transition-all duration-500`} style={{ width: `${progressPercentage}%` }} />
@@ -628,7 +882,7 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
                   <div key={p.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-black/30 rounded-xl border border-[#1e1e1e] hover:border-[#2a2a2a] transition-colors text-xs">
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-white truncate">{p.medName}</p>
-                      <span className="text-[9px] text-gray-500 font-bold block mt-1">{formatDateBR(p.date)} • Qtd: {p.quantity} comp.</span>
+                      <span className="text-[9px] text-gray-500 font-bold block mt-1">{formatDateBR(p.date)} • Qtd: {p.quantity} {p.medName.toLowerCase().includes('ozivy') ? 'UI' : 'comp.'}</span>
                     </div>
 
                     <div className="flex items-center justify-between sm:justify-end gap-2 font-mono text-right shrink-0">
@@ -654,3 +908,4 @@ export const MedicationTracker: React.FC<{ currentUser?: any }> = () => {
     </div>
   );
 };
+
