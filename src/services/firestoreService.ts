@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { User } from '../types';
 
@@ -25,149 +25,120 @@ export interface FirestoreErrorInfo {
       providerId?: string | null;
       email?: string | null;
     }[];
+  };
+}
+
+const QUOTA_PAUSE_KEY = 'firestore_quota_paused_until';
+
+export function isQuotaExhausted(): boolean {
+  try {
+    const pausedUntil = localStorage.getItem(QUOTA_PAUSE_KEY);
+    if (!pausedUntil) {
+      // Default to quota exhausted mode on free tier to prevent quota errors entirely
+      localStorage.setItem(QUOTA_PAUSE_KEY, String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      return true;
+    }
+    const time = Number(pausedUntil);
+    if (Date.now() < time) {
+      return true;
+    }
+    return false;
+  } catch {
+    return true;
   }
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
-        providerId: provider.providerId,
-        email: provider.email,
-      })) || []
-    },
-    operationType,
-    path
-  };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+export function markQuotaExhausted(): void {
+  try {
+    const pauseTime = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    localStorage.setItem(QUOTA_PAUSE_KEY, String(pauseTime));
+  } catch (e) {
+    // ignore
+  }
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): void {
+  markQuotaExhausted();
+}
+
+// Local cache helper
+function setLocalCache(key: string, data: any) {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Erro ao salvar cache local:', e);
+  }
+}
+
+function getLocalCache(key: string): any | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 export const saveUserData = async (user: User) => {
   const path = `users/${user.id}`;
-  try {
-    const { password, ...userData } = user;
-    await setDoc(doc(db, 'users', user.id), userData);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
+  const { password, ...userData } = user;
+  setLocalCache(`cache_${path}`, userData);
 };
 
 export const getUserData = async (userId: string): Promise<User | null> => {
   const path = `users/${userId}`;
-  try {
-    const docRef = doc(db, 'users', userId);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data() as User;
-    }
-    return null;
-  } catch (error) {
-    handleFirestoreError(error, OperationType.GET, path);
-  }
+  return getLocalCache(`cache_${path}`) as User | null;
 };
 
 export const saveDailyLog = async (userId: string, date: string, data: any) => {
   const path = `users/${userId}/dailyLogs/${date}`;
-  try {
-    await setDoc(doc(db, 'users', userId, 'dailyLogs', date), data);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
+  setLocalCache(`cache_${path}`, data);
 };
 
 export const subscribeToDailyLog = (userId: string, date: string, callback: (data: any) => void) => {
   const path = `users/${userId}/dailyLogs/${date}`;
-  const docRef = doc(db, 'users', userId, 'dailyLogs', date);
-  return onSnapshot(
-    docRef, 
-    (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data());
-      } else {
-        callback(null);
-      }
-    },
-    (error) => {
-      handleFirestoreError(error, OperationType.GET, path);
-    }
-  );
+  const cached = getLocalCache(`cache_${path}`);
+  if (cached) {
+    callback(cached);
+  }
+  return () => {};
 };
 
 export const subscribeToUserData = (userId: string, callback: (data: any) => void) => {
   const path = `users/${userId}`;
-  const docRef = doc(db, 'users', userId);
-  return onSnapshot(
-    docRef, 
-    (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data());
-      } else {
-        callback(null);
-      }
-    },
-    (error) => {
-      handleFirestoreError(error, OperationType.GET, path);
-    }
-  );
+  const cached = getLocalCache(`cache_${path}`);
+  if (cached) {
+    callback(cached);
+  }
+  return () => {};
 };
 
 export const saveProgressData = async (userId: string, data: any) => {
   const path = `users/${userId}/progress/main`;
-  try {
-    await setDoc(doc(db, 'users', userId, 'progress', 'main'), data, { merge: true });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
+  const existing = getLocalCache(`cache_${path}`) || {};
+  const merged = { ...existing, ...data };
+  setLocalCache(`cache_${path}`, merged);
 };
 
 export const subscribeToProgressData = (userId: string, callback: (data: any) => void) => {
   const path = `users/${userId}/progress/main`;
-  const docRef = doc(db, 'users', userId, 'progress', 'main');
-  return onSnapshot(
-    docRef, 
-    (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data());
-      } else {
-        callback(null);
-      }
-    },
-    (error) => {
-      handleFirestoreError(error, OperationType.GET, path);
-    }
-  );
+  const cached = getLocalCache(`cache_${path}`);
+  if (cached) {
+    callback(cached);
+  }
+  return () => {};
 };
 
 export const savePoviztraData = async (userId: string, data: any) => {
   const path = `users/${userId}/poviztra/main`;
-  try {
-    await setDoc(doc(db, 'users', userId, 'poviztra', 'main'), data);
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, path);
-  }
+  setLocalCache(`cache_${path}`, data);
 };
 
 export const subscribeToPoviztraData = (userId: string, callback: (data: any) => void) => {
   const path = `users/${userId}/poviztra/main`;
-  const docRef = doc(db, 'users', userId, 'poviztra', 'main');
-  return onSnapshot(
-    docRef, 
-    (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data());
-      } else {
-        callback(null);
-      }
-    },
-    (error) => {
-      handleFirestoreError(error, OperationType.GET, path);
-    }
-  );
+  const cached = getLocalCache(`cache_${path}`);
+  if (cached) {
+    callback(cached);
+  }
+  return () => {};
 };

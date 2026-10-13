@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Syringe,
   Pill,
@@ -43,6 +43,7 @@ import { PoviztraControl } from './components/PoviztraControl';
 import { NutrobarraMetrics } from './components/NutrobarraMetrics';
 import { MedicationTracker } from './components/MedicationTracker';
 import { PWAInstallButton } from './components/PWAInstallButton';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { motion } from 'motion/react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { 
@@ -77,6 +78,8 @@ interface MealData {
 const App = () => {
   console.log("App rendering...");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const lastSavedDailyLogRef = useRef<string>('');
+  const lastSavedProgressRef = useRef<string>('');
   
   // Restore user from localStorage on mount
   useEffect(() => {
@@ -84,7 +87,8 @@ const App = () => {
     if (savedUserId) {
       const user = USERS.find(u => u.id === savedUserId);
       if (user) {
-        setCurrentUser(user);
+        const savedAvatar = localStorage.getItem(`avatar_${user.id}`);
+        setCurrentUser({ ...user, avatarUrl: savedAvatar || user.avatarUrl });
       }
     }
   }, []);
@@ -693,14 +697,15 @@ const App = () => {
       const today = new Date().toISOString().split('T')[0];
       const unsubscribeDaily = subscribeToDailyLog(currentUser.id, today, (data) => {
         if (data) {
+          let loadedMeals = {};
           if (data.confirmedMeals) {
-            let loadedMeals = { ...data.confirmedMeals };
+            loadedMeals = { ...data.confirmedMeals };
             // Clear the fake placeholder meals
-            if (loadedMeals[101] && loadedMeals[101].realDescription?.includes('pimenta')) {
-              delete loadedMeals[101];
+            if ((loadedMeals as any)[101]?.realDescription?.includes('pimenta')) {
+              delete (loadedMeals as any)[101];
             }
-            if (loadedMeals[102] && loadedMeals[102].realDescription?.includes('coxinha')) {
-              delete loadedMeals[102];
+            if ((loadedMeals as any)[102]?.realDescription?.includes('coxinha')) {
+              delete (loadedMeals as any)[102];
             }
             setConfirmedMeals(loadedMeals);
           } else {
@@ -709,6 +714,13 @@ const App = () => {
           if (data.waterIntake !== undefined) setWaterIntake(data.waterIntake);
           if (data.waterGoal !== undefined) setWaterGoal(data.waterGoal);
           if (data.isDiaDeTreino !== undefined) setIsDiaDeTreino(data.isDiaDeTreino);
+
+          lastSavedDailyLogRef.current = JSON.stringify({
+            confirmedMeals: loadedMeals,
+            waterIntake: data.waterIntake ?? 2000,
+            waterGoal: data.waterGoal ?? 4000,
+            isDiaDeTreino: data.isDiaDeTreino ?? false
+          });
         }
         setIsDataLoaded(true);
       });
@@ -718,15 +730,24 @@ const App = () => {
           if (data.healthMeasurements) setHealthMeasurements(data.healthMeasurements);
           if (data.bioimpedanceAssessments && data.bioimpedanceAssessments.length > 0) {
              setBioimpedanceAssessments(prev => {
+                let changed = false;
                 const merged = [...prev];
                 data.bioimpedanceAssessments.forEach((cloudItem: any) => {
                    if (!merged.find(item => item.id === cloudItem.id || item.date === cloudItem.date)) {
                        merged.push(cloudItem);
+                       changed = true;
                    }
                 });
+                if (!changed && merged.length === prev.length) {
+                   return prev;
+                }
                 return merged.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
              });
           }
+          lastSavedProgressRef.current = JSON.stringify({
+            healthMeasurements: data.healthMeasurements,
+            bioimpedanceAssessments: data.bioimpedanceAssessments
+          });
         }
         setIsProgressLoaded(true);
       });
@@ -741,23 +762,39 @@ const App = () => {
 
   useEffect(() => {
     if (currentUser && isDataLoaded && isProgressLoaded) {
+      const currentDailyLogStr = JSON.stringify({ confirmedMeals, waterIntake, waterGoal, isDiaDeTreino });
+      const currentProgressStr = JSON.stringify({ healthMeasurements, bioimpedanceAssessments });
+
+      const dailyChanged = lastSavedDailyLogRef.current !== '' && currentDailyLogStr !== lastSavedDailyLogRef.current;
+      const progressChanged = lastSavedProgressRef.current !== '' && currentProgressStr !== lastSavedProgressRef.current;
+
+      if (!dailyChanged && !progressChanged) {
+        return;
+      }
+
       const saveToCloud = async () => {
         setIsSyncing(true);
         const today = new Date().toISOString().split('T')[0];
         try {
-          await saveDailyLog(currentUser.id, today, { confirmedMeals, waterIntake, waterGoal, isDiaDeTreino });
-          await saveProgressData(currentUser.id, { healthMeasurements, bioimpedanceAssessments });
+          if (dailyChanged) {
+            lastSavedDailyLogRef.current = currentDailyLogStr;
+            await saveDailyLog(currentUser.id, today, { confirmedMeals, waterIntake, waterGoal, isDiaDeTreino });
+          }
+          if (progressChanged) {
+            lastSavedProgressRef.current = currentProgressStr;
+            await saveProgressData(currentUser.id, { healthMeasurements, bioimpedanceAssessments });
+          }
         } catch (error) {
-          console.error('Error syncing to cloud:', error);
+          console.warn('Sync status:', error);
         } finally {
           setIsSyncing(false);
         }
       };
       
-      const timeout = setTimeout(saveToCloud, 500); // 500ms debounce
+      const timeout = setTimeout(saveToCloud, 4000);
       return () => clearTimeout(timeout);
     }
-  }, [confirmedMeals, waterIntake, waterGoal, healthMeasurements, bioimpedanceAssessments, isDiaDeTreino, currentUser?.id, isDataLoaded]);
+  }, [confirmedMeals, waterIntake, waterGoal, healthMeasurements, bioimpedanceAssessments, isDiaDeTreino, currentUser?.id, isDataLoaded, isProgressLoaded]);
 
   const confirmChoice = (mealId: number, choice: string, data: any) => {
     setConfirmedMeals(prev => ({ 
@@ -996,26 +1033,16 @@ const App = () => {
   const totalKcal = totalMacros.kcal;
   const remainingKcal = CALORIE_GOAL - totalKcal;
 
-  if (!currentUser) {
-    try {
-      return <Login onLogin={setCurrentUser} />;
-    } catch (error) {
-      console.error("Erro ao renderizar Login:", error);
-      return (
-        <div className="flex items-center justify-center min-h-screen bg-[#222] p-4 text-center">
-          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md">
-            <h2 className="text-xl font-black text-red-600 mb-4 uppercase">Erro de Carregamento</h2>
-            <p className="text-gray-300 text-sm mb-6">Ocorreu um erro ao carregar a tela de login. Por favor, tente recarregar a página.</p>
-            <pre className="text-[10px] bg-[#222] p-4 rounded-xl overflow-auto text-left mb-6">
-              {error instanceof Error ? error.message : String(error)}
-            </pre>
-            <button onClick={() => window.location.reload()} className="w-full py-3 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest">
-              Recarregar
-            </button>
-          </div>
-        </div>
-      );
+  // Auto-login for single user
+  useEffect(() => {
+    const user = USERS.find(u => u.id === 'andre');
+    if (user) {
+      setCurrentUser(user);
     }
+  }, []);
+
+  if (!currentUser) {
+    return <div className="flex items-center justify-center min-h-screen bg-[#222] text-white">Carregando...</div>;
   }
 
   if (!currentUser.anamnesisCompleted) {
@@ -1038,7 +1065,7 @@ const App = () => {
         <div className="w-full max-w-xl md:max-w-4xl lg:max-w-7xl xl:max-w-[1550px] mx-auto">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#1f1f1f]">
+              <label className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#1f1f1f] cursor-pointer block relative">
                 {currentUser.avatarUrl ? (
                   <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full object-cover" />
                 ) : (
@@ -1046,16 +1073,40 @@ const App = () => {
                     <UserIcon size={24} />
                   </div>
                 )}
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-[1000] text-white tracking-[-0.08em] font-montserrat uppercase flex flex-wrap gap-1">
-                  <span>CONTROLE DE</span>
-                  <span className="text-red-600">SAÚDE</span>
-                </h1>
-                <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
-                  <Calendar className="w-4 h-4" />
-                  <span>{currentDayName || 'Hoje'} • {currentUser.name}</span>
-                  {isSyncing && <span className="text-[10px] text-red-500 font-bold uppercase">Sincronizando...</span>}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setCurrentUser(prev => prev ? { ...prev, avatarUrl: reader.result as string } : null);
+                        // Optional: save to local storage or firestore
+                        localStorage.setItem(`avatar_${currentUser.id}`, reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/icon.svg" 
+                  alt="Logotipo CONTROLE DE SAÚDE" 
+                  className="w-10 h-10 rounded-xl border border-white/10 shadow-md shadow-red-900/30 shrink-0" 
+                />
+                <div>
+                  <h1 className="text-lg sm:text-xl font-[1000] text-white tracking-[-0.08em] font-montserrat uppercase flex flex-wrap gap-1">
+                    <span>CONTROLE DE</span>
+                    <span className="text-red-600">SAÚDE</span>
+                  </h1>
+                  <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
+                    <Calendar className="w-4 h-4" />
+                    <span>{currentDayName || 'Hoje'} • {currentUser.name}</span>
+                    {isSyncing && <span className="text-[10px] text-red-500 font-bold uppercase">Sincronizando...</span>}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1102,8 +1153,8 @@ const App = () => {
         {activeTab === 'exames' && <BloodExams />}
         {activeTab === 'saude' && (
           <div className="space-y-6 pb-24">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+              <div className="h-full flex flex-col">
                 <WeightMetrics 
                   currentUser={currentUser} 
                   assessments={bioimpedanceAssessments} 
@@ -1111,8 +1162,9 @@ const App = () => {
                 />
               </div>
             
-            <div className="space-y-6">
-              <GlicemiaMetrics currentUser={currentUser} />
+              <div className="h-full flex flex-col">
+                <GlicemiaMetrics currentUser={currentUser} />
+              </div>
             </div>
             
             <div className="space-y-6">
@@ -1322,8 +1374,6 @@ const App = () => {
                   </div>
                 );
               })}
-            </div>
-
           </div>
         </div>
         
@@ -1398,7 +1448,7 @@ const App = () => {
         )}
 
         {activeTab === 'diario' && (
-          <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8 pb-32 items-start">
+          <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-2 md:gap-6 pb-32 items-start">
             <div className="space-y-6">
               {/* RESUMO DE CALORIAS (MYFITNESSPAL STYLE) */}
             <div className="bg-slate-900 rounded-3xl p-6 text-white shadow-xl shadow-slate-200 mb-6">
@@ -2103,6 +2153,9 @@ const App = () => {
       {showBloodExams && (
         <BloodExams onClose={() => setShowBloodExams(false)} />
       )}
+
+      {/* INDICADOR DE STATUS OFFLINE / ONLINE */}
+      <OfflineIndicator />
     </div>
   );
 };

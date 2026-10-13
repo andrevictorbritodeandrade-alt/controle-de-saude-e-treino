@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   LineChart,
   Line,
@@ -68,6 +68,7 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
   const [selectedPeriod, setSelectedPeriod] = useState<'Manhã' | 'Tarde' | 'Noite'>('Manhã');
   const [filterType, setFilterType] = useState<'all' | '30' | '15' | '7'>('30');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const lastSavedRef = useRef<string>('');
 
   // Load from Cloud / LocalStorage
   useEffect(() => {
@@ -75,15 +76,19 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
       const unsubscribe = subscribeToProgressData(currentUser.id, (cloudData) => {
         if (cloudData && cloudData.glucoseData && cloudData.glucoseData.length > 0) {
           setData(cloudData.glucoseData);
+          lastSavedRef.current = JSON.stringify(cloudData.glucoseData);
           localStorage.setItem(`glucose_data_${currentUser.id}`, JSON.stringify(cloudData.glucoseData));
         } else {
           const saved = localStorage.getItem(`glucose_data_${currentUser.id}`);
           if (saved) {
-            setData(JSON.parse(saved));
+            const parsed = JSON.parse(saved);
+            setData(parsed);
+            lastSavedRef.current = saved;
           } else {
-            // Seed default 76 historical readings
+            // Seed default historical readings
             const seeded = buildDefaultGlucoseHistory();
             setData(seeded);
+            lastSavedRef.current = JSON.stringify(seeded);
             localStorage.setItem(`glucose_data_${currentUser.id}`, JSON.stringify(seeded));
           }
         }
@@ -101,15 +106,20 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
     }
   }, [currentUser]);
 
-  // Save to Cloud & LocalStorage
+  // Save to Cloud & LocalStorage only on actual modification
   useEffect(() => {
-    if (isDataLoaded) {
-      if (currentUser) {
-        saveProgressData(currentUser.id, { glucoseData: data }).catch(console.error);
-        localStorage.setItem(`glucose_data_${currentUser.id}`, JSON.stringify(data));
-      } else {
-        localStorage.setItem('glucose_data_guest', JSON.stringify(data));
+    if (isDataLoaded && currentUser) {
+      const currentStr = JSON.stringify(data);
+      if (lastSavedRef.current !== '' && currentStr !== lastSavedRef.current) {
+        lastSavedRef.current = currentStr;
+        localStorage.setItem(`glucose_data_${currentUser.id}`, currentStr);
+        const timeout = setTimeout(() => {
+          saveProgressData(currentUser.id, { glucoseData: data }).catch(console.warn);
+        }, 3000);
+        return () => clearTimeout(timeout);
       }
+    } else if (isDataLoaded && !currentUser) {
+      localStorage.setItem('glucose_data_guest', JSON.stringify(data));
     }
   }, [data, currentUser, isDataLoaded]);
 
@@ -339,85 +349,84 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
           </div>
         </div>
 
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredData}>
-              <defs>
-                <linearGradient id="glucoseLineGradient" x1="0" y1="0" x2="1" y2="0">
-                  {filteredData.map((_, i) => {
-                    if (i === 0) return null;
-                    const prev = filteredData[i - 1].value;
-                    const curr = filteredData[i].value;
+        <div className="h-72 overflow-x-auto">
+          <div style={{ width: `${Math.max(100, filteredData.length * 60)}px` }} className="h-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredData}>
+                {/* ... (resto do conteúdo da LineChart) */}
+                <defs>
+                  <linearGradient id="glucoseLineGradient" x1="0" y1="0" x2="1" y2="0">
+                    {filteredData.map((_, i) => {
+                      if (i === 0) return null;
+                      const prev = filteredData[i - 1].value;
+                      const curr = filteredData[i].value;
+                      
+                      const color = curr < prev ? '#10b981' : curr > prev ? '#ef4444' : '#6366f1';
+                      const prevPerc = ((i - 1) / (filteredData.length - 1)) * 100;
+                      const currPerc = (i / (filteredData.length - 1)) * 100;
+                      return (
+                        <React.Fragment key={i}>
+                          <stop offset={`${prevPerc}%`} stopColor={color} />
+                          <stop offset={`${currPerc}%`} stopColor={color} />
+                        </React.Fragment>
+                      );
+                    })}
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f1f" />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="#666" 
+                  fontSize={9}
+                  fontWeight="bold"
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                  dy={10}
+                />
+                <YAxis 
+                  domain={[0, 'auto']} 
+                  stroke="#666" 
+                  fontSize={9}
+                  fontWeight="bold"
+                  tickLine={false}
+                  axisLine={false}
+                  dx={-10}
+                />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0a0a0a', borderRadius: '1rem', border: '1px solid #1f1f1f', color: '#fff', fontSize: '11px', fontWeight: 'bold' }} 
+                  itemStyle={{ color: '#fff' }}
+                  labelFormatter={(label) => `Data: ${label}`}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="url(#glucoseLineGradient)" 
+                  strokeWidth={3}
+                  dot={(props: any) => {
+                    const { cx, cy, payload, index } = props;
+                    if (index === 0) return <circle key={index} cx={cx} cy={cy} r={4.5} fill="#ffffff" stroke="#000" strokeWidth={1.5} />;
+                    const prev = filteredData[index - 1].value;
+                    const curr = payload.value;
                     
-                    // Same logic: Green for lower/decrease, red/orange for increase
-                    const color = curr < prev ? '#10b981' : curr > prev ? '#ef4444' : '#6366f1';
-                    const prevPerc = ((i - 1) / (filteredData.length - 1)) * 100;
-                    const currPerc = (i / (filteredData.length - 1)) * 100;
-                    return (
-                      <React.Fragment key={i}>
-                        <stop offset={`${prevPerc}%`} stopColor={color} />
-                        <stop offset={`${currPerc}%`} stopColor={color} />
-                      </React.Fragment>
-                    );
-                  })}
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f1f" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#666" 
-                fontSize={9}
-                fontWeight="bold"
-                tickLine={false}
-                axisLine={false}
-                dy={10}
-              />
-              <YAxis 
-                domain={[0, 'auto']} 
-                stroke="#666" 
-                fontSize={9}
-                fontWeight="bold"
-                tickLine={false}
-                axisLine={false}
-                dx={-10}
-              />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#0a0a0a', borderRadius: '1rem', border: '1px solid #1f1f1f', color: '#fff', fontSize: '11px', fontWeight: 'bold' }} 
-                itemStyle={{ color: '#fff' }}
-                labelFormatter={(label) => `Data: ${label}`}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                stroke="url(#glucoseLineGradient)" 
-                strokeWidth={3}
-                dot={(props: any) => {
-                  const { cx, cy, payload, index } = props;
-                  if (index === 0) return <circle key={index} cx={cx} cy={cy} r={4.5} fill="#ffffff" stroke="#000" strokeWidth={1.5} />;
-                  const prev = filteredData[index - 1].value;
-                  const curr = payload.value;
-                  
-                  // Color dot matching line gradient and ranges (hypo is blue/indigo, normal is green, high is red)
-                  let color = curr < prev ? '#10b981' : curr > prev ? '#ef4444' : '#6366f1';
-                  if (curr < 70) color = '#3b82f6'; // hypo
-                  else if (curr > 140) color = '#ec4899'; // hyper
-                  
-                  return <circle key={index} cx={cx} cy={cy} r={4.5} fill={color} stroke="#000" strokeWidth={1.5} />;
-                }}
-                isAnimationActive={false}
-              >
-                {/* Labels only if we are seeing a shorter period to prevent cluttering */}
-                {filteredData.length <= 35 && (
+                    let color = curr < prev ? '#10b981' : curr > prev ? '#ef4444' : '#6366f1';
+                    if (curr < 70) color = '#3b82f6';
+                    else if (curr > 140) color = '#ec4899';
+                    
+                    return <circle key={index} cx={cx} cy={cy} r={4.5} fill={color} stroke="#000" strokeWidth={1.5} />;
+                  }}
+                  isAnimationActive={false}
+                >
                   <LabelList 
                     dataKey="value" 
                     position="top" 
                     offset={10} 
-                    style={{ fontSize: '9px', fontWeight: 'bold', fill: '#ffffff' }} 
+                    style={{ fontSize: '12px', fontWeight: 'bold', fill: '#ffffff' }} 
                   />
-                )}
-              </Line>
-            </LineChart>
-          </ResponsiveContainer>
+                </Line>
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         <p className="text-[10px] text-gray-500 font-medium italic mt-4 text-center leading-relaxed">
           💡 Clique nos botões acima (7d, 15d, 30d, Tudo) para expandir ou focar no gráfico e ver as flutuações em detalhes!
@@ -484,10 +493,10 @@ export const GlicemiaMetrics: React.FC<{ currentUser?: User }> = ({ currentUser 
                   </span>
                   
                   <div className="text-right">
-                    <span className="text-xl font-bold font-montserrat text-white tracking-tight">
+                    <span className="text-3xl font-bold font-montserrat text-white tracking-tight">
                       {item.value}
                     </span>
-                    <span className="text-[9px] font-semibold text-gray-500 block">mg/dL</span>
+                    <span className="text-[12px] font-semibold text-gray-500 block">mg/dL</span>
                   </div>
 
                   {/* Boutão DELETE para correções */}

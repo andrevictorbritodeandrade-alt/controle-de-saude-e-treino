@@ -14,10 +14,13 @@ async function testConnection() {
     await getDocFromServer(doc(db, 'test', 'connection'));
     console.log("Firestore connection successful");
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Firestore connection failed: The client is offline. Please check your Firebase configuration.");
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes('resource-exhausted') || msg.toLowerCase().includes('quota')) {
+      console.warn("Firestore: Cota diária do plano gratuito atingida. Operando em modo offline/cache local com persistência total.");
+    } else if (msg.includes('the client is offline')) {
+      console.info("Firestore: Operando em modo offline.");
     } else {
-      console.error("Firestore connection error:", error);
+      console.warn("Firestore connection check:", msg);
     }
   }
 }

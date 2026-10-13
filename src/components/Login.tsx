@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { isQuotaExhausted } from '../services/firestoreService';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -98,10 +99,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               }
               
               // Salva no Firestore
-              try {
-                await setDoc(doc(db, 'users', user.id), { avatarUrl: b64, avatarVersion: 'v5' }, { merge: true });
-              } catch (e) {
-                console.warn("Erro ao salvar avatar no Firestore:", e);
+              if (!isQuotaExhausted()) {
+                try {
+                  await setDoc(doc(db, 'users', user.id), { avatarUrl: b64, avatarVersion: 'v5' }, { merge: true });
+                } catch (e) {
+                  console.warn("Erro ao salvar avatar no Firestore:", e);
+                }
               }
               generated = true;
               break;
@@ -145,11 +148,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       });
 
       // Salva o usuário no Firestore (sem salvar o avatar base64 para evitar exceder o limite de 1MB)
-      if (avatars[user.id]) {
+      if (avatars[user.id] && !isQuotaExhausted()) {
         const { password, ...userData } = user;
-        await setDoc(doc(db, 'users', user.id), {
-          ...userData,
-        }, { merge: true });
+        try {
+          await setDoc(doc(db, 'users', user.id), {
+            ...userData,
+          }, { merge: true });
+        } catch (e) {
+          console.warn("Erro ao salvar dados no Firestore:", e);
+        }
       }
     } catch (err: any) {
       console.error("Erro ao salvar dados no Firestore:", err);

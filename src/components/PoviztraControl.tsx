@@ -1,42 +1,31 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Pill, Droplet, RefreshCcw, CheckCircle2, Timer, Beaker, AlertCircle, List, ChevronDown, ChevronUp, ShoppingCart, CalendarDays, TrendingUp } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Pill, Droplet, RefreshCcw, CheckCircle2, Timer, Beaker, AlertCircle, List, ChevronDown, ChevronUp, ShoppingCart, CalendarDays, TrendingUp, Sparkles, Plus, Syringe } from 'lucide-react';
 import { User } from '../types';
 import { savePoviztraData, subscribeToPoviztraData } from '../services/firestoreService';
 
 const DEFAULT_HISTORY = [
-  { id: 101, name: 'Dose Caneta (37 clicks [0,5mg] - Semana 1)', timestamp: '28/09/2026 08:00:00' },
-  { id: 20, name: 'Dose Caneta (6 clicks - Semana 4)', timestamp: '02/06/2026 08:00:00' },
-  { id: 19, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '26/05/2026 08:00:00' },
-  { id: 18, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '25/05/2026 08:00:00' },
-  { id: 17, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '23/05/2026 08:00:00' },
-  { id: 16, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '22/05/2026 08:00:00' },
-  { id: 15, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '21/05/2026 08:00:00' },
-  { id: 14, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '20/05/2026 08:00:00' },
-  { id: 13, name: 'CONSULTA: Reavaliação Caneta (Dr. Noé)', timestamp: '29/05/2026 10:00:00' },
-  { id: 12, name: 'Dose Caneta (4 clicks - Semana 2)', timestamp: '19/05/2026 08:00:00' },
-  { id: 11, name: 'Dose Caneta (4 clicks - Semana 2)', timestamp: '18/05/2026 08:00:00' },
-  { id: 10, name: 'Dose Caneta (4 clicks - Semana 2)', timestamp: '16/05/2026 08:00:00' },
-  { id: 9, name: 'Dose Caneta (4 clicks - Semana 2)', timestamp: '15/05/2026 08:00:00' },
-  { id: 8, name: 'Dose Caneta (4 clicks - Semana 2)', timestamp: '14/05/2026 08:00:00' },
-  { id: 7, name: 'Dose Caneta (4 clicks - Semana 2)', timestamp: '13/05/2026 08:00:00' },
-  { id: 6, name: 'Dose Caneta (4 clicks - Semana 1)', timestamp: '12/05/2026 08:00:00' },
-  { id: 5, name: 'Dose Caneta (4 clicks - Semana 1)', timestamp: '11/05/2026 08:00:00' },
-  { id: 4, name: 'Dose Caneta (4 clicks - Semana 1)', timestamp: '09/05/2026 08:00:00' },
-  { id: 3, name: 'Dose Caneta (4 clicks - Semana 1)', timestamp: '08/05/2026 08:00:00' },
-  { id: 2, name: 'Dose Caneta (4 clicks - Semana 1)', timestamp: '07/05/2026 08:00:00' },
-  { id: 1, name: 'Dose Caneta (4 clicks - Semana 1)', timestamp: '06/05/2026 08:00:00' }
+  { id: 104, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Hoje)', timestamp: '13/10/2026 08:00:00', units: 37 },
+  { id: 103, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Ontem)', timestamp: '12/10/2026 08:00:00', units: 37 },
+  { id: 102, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 2)', timestamp: '05/10/2026 08:00:00', units: 37 },
+  { id: 101, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 1)', timestamp: '28/09/2026 08:00:00', units: 37 },
+  { id: 20, name: 'Dose Caneta (6 clicks - Semana 4)', timestamp: '02/06/2026 08:00:00', units: 6 },
+  { id: 19, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '26/05/2026 08:00:00', units: 6 },
+  { id: 18, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '25/05/2026 08:00:00', units: 6 },
+  { id: 17, name: 'Dose Caneta (6 clicks - Semana 3)', timestamp: '23/05/2026 08:00:00', units: 6 },
+  { id: 13, name: 'CONSULTA: Reavaliação Caneta (Dr. Noé)', timestamp: '29/05/2026 10:00:00', units: 0 }
 ];
 
 const DEFAULT_OZEMPIC = {
-  name: 'Caneta',
+  name: 'Caneta Poviztra',
   totalUnits: 300,
-  remainingUnits: 263,
-  startWeight: 103.6, 
+  remainingUnits: 152, // 300 - (4 * 37) = 152 cliques restantes
+  startWeight: 103.6,
   purchaseDate: '2026-09-28',
   startDate: '2026-09-28',
-  doseClicks: 37,
-  doseEquivalent: '0,5 mg (meio)',
-  frequency: 'Semanal (Segundas)',
+  doseClicks: 37, // 37 cliques por aplicação
+  weeklyDoseClicks: 74, // Aumentou a dose: 2x 37 = 74 cliques nesta semana 3
+  doseEquivalent: '0,5 mg x 2 (1,0 mg na semana 3)',
+  frequency: 'Semanal (2 aplicações de 37 cliques)',
 };
 
 const DEFAULT_VITAMINS = {
@@ -48,13 +37,12 @@ const DEFAULT_VITAMINS = {
 
 export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }) => {
   // --- ESTADOS ---
-  const [globalHistory, setGlobalHistory] = useState<{ id: number; name: string; timestamp: string }[]>(() => {
+  const [globalHistory, setGlobalHistory] = useState<{ id: number; name: string; timestamp: string; units?: number }[]>(() => {
     const saved = localStorage.getItem(`history_${currentUser.id}`);
     return saved ? JSON.parse(saved) : [...DEFAULT_HISTORY];
   });
   const [expandedSection, setExpandedSection] = useState('summary');
-
-  const [showPrescription, setShowPrescription] = useState(false);
+  const [showPrescription, setShowPrescription] = useState(true);
 
   // Poviztra: 300 clicks totais
   const [ozempic, setOzempic] = useState(() => {
@@ -92,121 +80,41 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           currentVitamins = savedVits ? JSON.parse(savedVits) : { ...DEFAULT_VITAMINS };
         }
 
-        // Auto-registro das doses de 26, 27, 28, 29, 30 de maio de 2026 e 01, 02 de junho de 2026
-        const datesToRegister = [
-          { date: '26/05/2026', checkStr: '26/05/2026' },
-          { date: '27/05/2026', checkStr: '27/05/2026' },
-          { date: '28/05/2026', checkStr: '28/05/2026' },
-          { date: '29/05/2026', checkStr: '29/05/2026' },
-          { date: '30/05/2026', checkStr: '30/05/2026' },
-          { date: '01/06/2026', checkStr: '01/06/2026' },
-          { date: '02/06/2026', checkStr: '02/06/2026' },
-          { date: '03/06/2026', checkStr: '03/06/2026' },
-          { date: '04/06/2026', checkStr: '04/06/2026' },
-          { date: '05/06/2026', checkStr: '05/06/2026' },
-          { date: '06/06/2026', checkStr: '06/06/2026' },
-          { date: '08/06/2026', checkStr: '08/06/2026' },
-          { date: '09/06/2026', checkStr: '09/06/2026' },
-          { date: '10/06/2026', checkStr: '10/06/2026' },
-          { date: '11/06/2026', checkStr: '11/06/2026' },
-          { date: '12/06/2026', checkStr: '12/06/2026' },
-          { date: '13/06/2026', checkStr: '13/06/2026' },
-          { date: '15/06/2026', checkStr: '15/06/2026' },
-          { date: '16/06/2026', checkStr: '16/06/2026' },
-          { date: '17/06/2026', checkStr: '17/06/2026' },
-          { date: '18/06/2026', checkStr: '18/06/2026' },
-          { date: '19/06/2026', checkStr: '19/06/2026' },
-          { date: '20/06/2026', checkStr: '20/06/2026' },
-          { date: '22/06/2026', checkStr: '22/06/2026' },
-          { date: '23/06/2026', checkStr: '23/06/2026' },
-          { date: '24/06/2026', checkStr: '24/06/2026' },
-          { date: '25/06/2026', checkStr: '25/06/2026' },
-          { date: '26/06/2026', checkStr: '26/06/2026' },
-          { date: '27/06/2026', checkStr: '27/06/2026' },
-          { date: '29/06/2026', checkStr: '29/06/2026' },
-          { date: '30/06/2026', checkStr: '30/06/2026' },
-          { date: '01/07/2026', checkStr: '01/07/2026' },
+        // Garantir que as 4 doses do ciclo atual (Semana 1 a 3) estejam registradas
+        const requiredDoses = [
+          { check: '28/09/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 1)', timestamp: '28/09/2026 08:00:00', units: 37 },
+          { check: '05/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 2)', timestamp: '05/10/2026 08:00:00', units: 37 },
+          { check: '12/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Ontem)', timestamp: '12/10/2026 08:00:00', units: 37 },
+          { check: '13/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Hoje)', timestamp: '13/10/2026 08:00:00', units: 37 },
         ];
 
-        let historyChanged = false;
-
-        datesToRegister.forEach(({ date, checkStr }) => {
-          // Verificar se já existe uma dose marcada nessa data específica
-          const alreadyExists = currentHistory.some(item => 
-            item.name.toLowerCase().includes('dose poviztra') && item.timestamp.includes(checkStr)
-          );
-
-          if (!alreadyExists) {
-            // Calcular a semana precisa baseada no ozempic.startDate
-            const parts = date.split('/');
-            const dateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-            const startObj = new Date(currentOzempic.startDate);
-            const diffDays = Math.floor((dateObj.getTime() - startObj.getTime()) / (1000 * 60 * 60 * 24));
-            const semanaCalculada = Math.ceil((diffDays + 1) / 7) || 1;
-
-            const id = Date.now() + Math.floor(Math.random() * 100000) + Math.floor(Math.random() * 1000);
+        let historyUpdated = false;
+        requiredDoses.forEach((rd, idx) => {
+          const exists = currentHistory.some(item => item.timestamp.includes(rd.check));
+          if (!exists) {
             currentHistory.unshift({
-              id,
-              name: `Dose Poviztra (6 clicks - Semana ${semanaCalculada})`,
-              timestamp: `${date} 08:00:00`
+              id: Date.now() + idx + 1000,
+              name: rd.name,
+              timestamp: rd.timestamp,
+              units: rd.units
             });
-
-            // Reduzir as unidades do Ozempic/Poviztra (6 clicks)
-            currentOzempic.remainingUnits = Math.max(0, currentOzempic.remainingUnits - 6);
-            historyChanged = true;
+            historyUpdated = true;
           }
         });
 
-        // Limpar menções a Poviztra no histórico para Caneta
-        currentHistory = currentHistory.map(item => ({
-          ...item,
-          name: item.name.replace(/poviztra/gi, 'Caneta')
-        }));
+        // Garantir que a carga da caneta reflita os 152 cliques restantes de 300
+        currentOzempic.totalUnits = 300;
+        currentOzempic.remainingUnits = 152;
+        currentOzempic.startDate = '2026-09-28';
+        currentOzempic.doseClicks = 37;
+        currentOzempic.weeklyDoseClicks = 74;
 
-        // Verificar e registrar a dose de 28/09/2026 (reinício com 37 clicks)
-        const hasSept28 = currentHistory.some(item => item.timestamp.includes('28/09/2026'));
-        if (!hasSept28) {
-          currentHistory.unshift({
-            id: Date.now() + 999,
-            name: 'Dose Caneta (37 clicks [0,5mg] - Semana 1)',
-            timestamp: '28/09/2026 08:00:00'
-          });
-          currentOzempic.remainingUnits = Math.min(currentOzempic.remainingUnits, 263);
-          currentOzempic.startDate = '2026-09-28';
-          currentOzempic.startWeight = 103.6;
-          currentOzempic.doseClicks = 37;
-          currentOzempic.doseEquivalent = '0,5 mg (meio)';
-          currentOzempic.frequency = 'Semanal (Segundas)';
-          historyChanged = true;
-        }
-
-        if (historyChanged) {
-          // Ordenar o histórico por data de forma decrescente para manter a coerência visual
+        if (historyUpdated) {
           currentHistory.sort((a, b) => {
-            const partsA = a.timestamp.split(' ');
-            const datePartsA = partsA[0].split('/');
-            const timePartsA = partsA[1].split(':');
-            const dateA = new Date(
-              parseInt(datePartsA[2]), 
-              parseInt(datePartsA[1]) - 1, 
-              parseInt(datePartsA[0]), 
-              parseInt(timePartsA[0]), 
-              parseInt(timePartsA[1]), 
-              parseInt(timePartsA[2] || '0')
-            );
-
-            const partsB = b.timestamp.split(' ');
-            const datePartsB = partsB[0].split('/');
-            const timePartsB = partsB[1].split(':');
-            const dateB = new Date(
-              parseInt(datePartsB[2]), 
-              parseInt(datePartsB[1]) - 1, 
-              parseInt(datePartsB[0]), 
-              parseInt(timePartsB[0]), 
-              parseInt(timePartsB[1]), 
-              parseInt(timePartsB[2] || '0')
-            );
-
+            const partsA = a.timestamp.split(' ')[0].split('/');
+            const dateA = new Date(parseInt(partsA[2]), parseInt(partsA[1]) - 1, parseInt(partsA[0]));
+            const partsB = b.timestamp.split(' ')[0].split('/');
+            const dateB = new Date(parseInt(partsB[2]), parseInt(partsB[1]) - 1, parseInt(partsB[0]));
             return dateB.getTime() - dateA.getTime();
           });
         }
@@ -214,25 +122,40 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
         setGlobalHistory(currentHistory);
         setOzempic(currentOzempic);
         setVitamins(currentVitamins);
+        lastSavedRef.current = JSON.stringify({
+          globalHistory: currentHistory,
+          ozempic: currentOzempic,
+          vitamins: currentVitamins
+        });
         setIsDataLoaded(true);
       });
       return () => unsubscribe();
     }
   }, [currentUser]);
 
-  // Save to Cloud and LocalStorage
+  const lastSavedRef = useRef<string>('');
+
+  // Save to Cloud and LocalStorage with check to prevent quota exhaustion
   useEffect(() => {
     if (currentUser && isDataLoaded) {
-      const data = { globalHistory, ozempic, vitamins };
-      savePoviztraData(currentUser.id, data).catch(console.error);
-      
+      const currentData = { globalHistory, ozempic, vitamins };
+      const currentStr = JSON.stringify(currentData);
+
       localStorage.setItem(`history_${currentUser.id}`, JSON.stringify(globalHistory));
       localStorage.setItem(`ozempic_${currentUser.id}`, JSON.stringify(ozempic));
       localStorage.setItem(`vitamins_${currentUser.id}`, JSON.stringify(vitamins));
+
+      if (lastSavedRef.current !== '' && currentStr !== lastSavedRef.current) {
+        lastSavedRef.current = currentStr;
+        const handler = setTimeout(() => {
+          savePoviztraData(currentUser.id, currentData).catch(console.warn);
+        }, 4000);
+        return () => clearTimeout(handler);
+      }
     }
   }, [globalHistory, ozempic, vitamins, currentUser, isDataLoaded]);
 
-  // EXAME 06/01/2026
+  // EXAMES
   const examData = useMemo(() => ({
     date: '06/01/2026',
     nextExamDate: '2026-04-06',
@@ -274,40 +197,35 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
     ]
   }), []);
 
-  // --- LÓGICA DE TEMPO E DOSAGEM ---
+  // --- ESTATÍSTICAS E CÁLCULOS DO CICLO ATUAL ---
   const stats = useMemo(() => {
-    const start = new Date(ozempic.startDate || '2026-09-28');
-    const now = new Date();
-    const diffDays = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
-    const currentWeek = Math.max(1, Math.ceil((diffDays + 1) / 7));
-    const currentDose = ozempic.doseClicks || 37;
+    const totalCap = ozempic.totalUnits || 300;
+    const remaining = ozempic.remainingUnits ?? 152;
+    const used = totalCap - remaining; // 148
+    const singleDose = ozempic.doseClicks || 37;
+    const currentWeek = 3; // Usuário confirmou explicitamente que está na semana 3
+    const weeklyClicks = ozempic.weeklyDoseClicks || 74; // 2x 37 = 74 cliques nesta semana
 
-    const dosesRemaining = Math.max(0, Math.floor(ozempic.remainingUnits / currentDose));
-    const weeksRemaining = dosesRemaining;
-    const daysRemaining = dosesRemaining * 7;
+    const dosesRemaining = Math.max(0, Math.floor(remaining / singleDose)); // 4 doses de 37
+    const weeksRemaining = weeklyClicks > 0 ? (remaining / weeklyClicks).toFixed(1) : '4';
 
-    // Próxima segunda-feira para aplicação
-    const nextDoseDate = new Date();
-    const currentDay = nextDoseDate.getDay(); // 0 = Dom, 1 = Seg
-    let daysUntilMonday = (1 - currentDay + 7) % 7;
-    if (daysUntilMonday === 0 && diffDays > 0) {
-      daysUntilMonday = 7;
-    }
-    nextDoseDate.setDate(nextDoseDate.getDate() + (daysUntilMonday === 0 ? 7 : daysUntilMonday));
-
-    const endDate = new Date(nextDoseDate);
-    endDate.setDate(endDate.getDate() + Math.max(0, dosesRemaining - 1) * 7);
+    // Próxima aplicação prevista
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + 6);
 
     return {
+      totalCap,
+      remaining,
+      used,
+      singleDose,
       currentWeek,
-      currentDose,
+      weeklyClicks,
       dosesRemaining,
-      daysRemaining,
       weeksRemaining,
-      nextDoseFormatted: nextDoseDate.toLocaleDateString('pt-BR'),
-      endDate: endDate.toLocaleDateString('pt-BR')
+      nextDoseFormatted: nextDate.toLocaleDateString('pt-BR'),
+      percentRemaining: Math.round((remaining / totalCap) * 100),
     };
-  }, [ozempic.startDate, ozempic.remainingUnits, ozempic.doseClicks]);
+  }, [ozempic]);
 
   const daysToExam = useMemo(() => {
     const diff = new Date(examData.nextExamDate).getTime() - new Date().getTime();
@@ -315,14 +233,20 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
   }, [examData.nextExamDate]);
 
   // --- AÇÕES ---
-  const addToHistory = (name: string) => {
-    setGlobalHistory(prev => [{ id: Date.now(), name, timestamp: new Date().toLocaleString('pt-BR') }, ...prev].slice(0, 50));
+  const addToHistory = (name: string, units = 37) => {
+    setGlobalHistory(prev => [
+      { id: Date.now(), name, timestamp: new Date().toLocaleString('pt-BR'), units },
+      ...prev
+    ].slice(0, 60));
   };
 
-  const takeCaneta = () => {
-    if (ozempic.remainingUnits < stats.currentDose) return;
-    setOzempic(prev => ({ ...prev, remainingUnits: Math.max(0, prev.remainingUnits - stats.currentDose) }));
-    addToHistory(`Dose Caneta (${stats.currentDose} clicks [0,5mg] - Semana ${stats.currentWeek})`);
+  const takeCaneta = (clicks = 37) => {
+    if (ozempic.remainingUnits < clicks) return;
+    setOzempic(prev => ({
+      ...prev,
+      remainingUnits: Math.max(0, prev.remainingUnits - clicks)
+    }));
+    addToHistory(`Dose Caneta Poviztra (${clicks} cliques [0,5mg] - Semana ${stats.currentWeek})`, clicks);
   };
 
   const takeVitamin = (key: string) => {
@@ -338,282 +262,308 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
       }
       return { ...prev, [key]: { ...v, lastDose: now, nextDose: next, cyclePhase: phase } };
     });
-    addToHistory(`Tomou ${vitamins[key].name}`);
-  };
-
-  const getOzempicColor = (units: number) => {
-    const p = (units / 300) * 100;
-    if (p > 75) return 'bg-red-600';
-    if (p > 50) return 'bg-red-500';
-    if (p > 20) return 'bg-red-500';
-    return 'bg-rose-500';
+    addToHistory(`Tomou ${vitamins[key].name}`, 0);
   };
 
   return (
-    <div className="space-y-6 pb-32 pt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 pb-32 pt-2 animate-in fade-in duration-300">
       
-      <div className="grid lg:grid-cols-2 lg:gap-8 items-start space-y-6 lg:space-y-0">
-        <div className="space-y-6">
-          {/* CANETA POVIZTRA: GESTÃO */}
-          <section className="bg-white rounded-[2.5rem] shadow-sm border border-[#333] overflow-hidden">
-            <div className="bg-slate-900 p-6 text-white flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <Droplet className="h-6 w-6 text-red-400" />
-                <div>
-                  <h2 className="text-xl font-black uppercase tracking-tight italic">Gestão da Caneta</h2>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Injetável • 300 clicks • 37 clicks semanais (Segundas)</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setOzempic(p => ({
-                  ...p, 
-                  remainingUnits: 300, 
-                  startDate: '2026-09-28',
-                  purchaseDate: '2026-09-28',
-                  startWeight: 103.6,
-                  doseClicks: 37
-                }))}
-                className="p-2.5 bg-white/10 rounded-2xl hover:bg-rose-500/20 active:scale-90 transition-all border border-white/10 cursor-pointer"
-                title="Reiniciar Caneta (300 clicks)"
-              >
-                <RefreshCcw className="h-4 w-4" />
-              </button>
+      {/* CABEÇALHO DO MÓDULO */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#121212] p-6 rounded-[2rem] border border-[#1f1f1f]">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-red-900/20 rounded-2xl flex items-center justify-center text-red-500 border border-red-900/30">
+            <Syringe className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight italic font-montserrat">
+                Caneta Poviztra
+              </h2>
+              <span className="bg-red-900/30 text-red-400 border border-red-900/50 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+                Semana 3 Ativa
+              </span>
             </div>
-            
-            <div className="p-6">
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1"><ShoppingCart className="w-3 h-3"/> Compra</label>
-                  <input type="date" value={ozempic.purchaseDate} onChange={(e) => setOzempic(p => ({...p, purchaseDate: e.target.value}))} className="w-full bg-[#1c1c1c] border-2 border-[#222] rounded-xl p-2 text-[10px] font-bold" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1"><CalendarDays className="w-3 h-3"/> Início</label>
-                  <input type="date" value={ozempic.startDate} onChange={(e) => setOzempic(p => ({...p, startDate: e.target.value}))} className="w-full bg-[#1c1c1c] border-2 border-[#222] rounded-xl p-2 text-[10px] font-bold" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1"><TrendingUp className="w-3 h-3"/> Peso Inic.</label>
-                  <input type="number" step="0.1" value={ozempic.startWeight} onChange={(e) => setOzempic(p => ({...p, startWeight: parseFloat(e.target.value) || 0}))} className="w-full bg-[#1c1c1c] border-2 border-[#222] rounded-xl p-2 text-[10px] font-bold" />
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-sm font-black text-gray-100 uppercase">Carga: {ozempic.remainingUnits} u / 300 u</span>
-                  <span className="text-[10px] font-black bg-red-900/10 text-red-500 px-2.5 py-1 rounded-lg uppercase">Semana {stats.currentWeek} • {stats.currentDose} clicks (0,5mg)</span>
-                </div>
-                <div className="w-full h-14 bg-[#222] rounded-2xl border-4 border-slate-50 overflow-hidden shadow-inner p-1">
-                  <div 
-                    className={`h-full transition-all duration-1000 rounded-xl shadow-lg ${getOzempicColor(ozempic.remainingUnits)}`}
-                    style={{ width: `${(ozempic.remainingUnits / 300) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 rounded-[2rem] p-6 mb-6 text-white relative overflow-hidden">
-                <div className="relative z-10 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase mb-1 opacity-70">Duração Restante</p>
-                    <p className="text-2xl font-black text-red-400 leading-none tracking-tighter">{stats.dosesRemaining} Doses</p>
-                    <p className="text-xs font-bold text-gray-400 mt-2 italic">{stats.weeksRemaining} Semanas ({stats.daysRemaining} dias)</p>
-                  </div>
-                  <div className="text-right border-l border-white/5 pl-4 flex flex-col justify-center">
-                    <p className="text-[10px] font-black text-gray-400 uppercase mb-1 opacity-70">Próxima Aplicação</p>
-                    <p className="text-lg font-black text-white tracking-tight">{stats.nextDoseFormatted}</p>
-                    <p className="text-[10px] text-red-400 font-bold mt-1 uppercase">Segunda-feira</p>
-                  </div>
-                </div>
-                <Timer className="absolute -right-6 -bottom-6 h-28 w-28 text-white/5" />
-              </div>
-
-              <button 
-                onClick={takeCaneta} 
-                disabled={ozempic.remainingUnits < stats.currentDose}
-                className="w-full py-5 bg-red-600 text-white rounded-[2rem] font-black text-lg shadow-xl shadow-red-900/40 hover:bg-red-700 active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <CheckCircle2 className="h-6 w-6" /> 
-                MARCAR DOSE SEMANAL ({stats.currentDose} CLICKS)
-              </button>
-            </div>
-          </section>
-
-          {/* ATIVIDADE RECENTE */}
-          <section className="bg-white rounded-[2.5rem] shadow-sm border border-[#333] overflow-hidden">
-            <div className="bg-[#1c1c1c] p-5 border-b border-[#222] flex items-center justify-between">
-              <h2 className="font-black text-white uppercase text-[10px] tracking-widest">Atividade Recente</h2>
-              <List className="h-4 w-4 text-gray-400" />
-            </div>
-            <div className="max-h-64 overflow-y-auto no-scrollbar">
-              {globalHistory.length === 0 ? (
-                <div className="p-12 text-center text-gray-500 font-black uppercase text-[10px] italic">Sem registros no momento</div>
-              ) : (
-                <div className="divide-y divide-slate-50">
-                  {globalHistory.map(item => (
-                    <div key={item.id} className="p-4 flex justify-between items-center text-[11px] font-bold">
-                      <span className="text-gray-100 italic">{item.name}</span>
-                      <span className="text-gray-400 text-[10px]">{item.timestamp}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">
+              Dose aumentada • 37 unidades ontem + 37 unidades hoje (74 cliques na semana)
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {/* MAPA DE SAÚDE */}
-          <section className="bg-white rounded-[2.5rem] shadow-sm border border-[#333] overflow-hidden">
-            <div className="bg-red-600 p-6 text-white flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <Beaker className="h-6 w-6" />
-                <h2 className="text-xl font-black uppercase tracking-tight italic">Mapa Biológico</h2>
-              </div>
-              <div className="text-right bg-white/20 px-3 py-1.5 rounded-2xl border border-white/20">
-                <p className="text-[9px] uppercase font-black opacity-80">Próximo Exame</p>
-                <p className="text-sm font-black">{daysToExam} dias</p>
-              </div>
+        <button 
+          onClick={() => {
+            if (window.confirm('Deseja redefinir a caneta com 300 unidades e 152 restantes para a Semana 3?')) {
+              setOzempic({
+                ...DEFAULT_OZEMPIC,
+                remainingUnits: 152,
+                totalUnits: 300,
+              });
+            }
+          }}
+          className="self-start sm:self-center flex items-center gap-2 px-4 py-2 bg-[#1c1c1c] hover:bg-[#252525] border border-[#2a2a2a] text-gray-300 rounded-xl text-xs font-black uppercase tracking-wider transition-colors"
+          title="Sincronizar Caneta Poviztra"
+        >
+          <RefreshCcw className="w-3.5 h-3.5 text-red-500" />
+          <span>Ajustar Refil</span>
+        </button>
+      </div>
+
+      {/* GRID DE CARDS 2 EM 2 COM O MESMO TAMANHO E NÚMEROS GRANDES */}
+      <div className="grid grid-cols-2 gap-3.5 sm:gap-5 lg:gap-6 items-stretch">
+        
+        {/* CARD 1: SEMANA ATUAL & DOSE DA SEMANA */}
+        <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full hover:border-[#2a2a2a] transition-all">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-500 bg-red-900/20 px-2.5 py-1 rounded-lg border border-red-900/30">
+                Semana 3 • Dose Dupla
+              </span>
+              <Droplet className="w-5 h-5 text-red-500" />
             </div>
-            <div className="p-6 space-y-3">
-              {examData.groups.map((group, idx) => (
-                <div key={idx} className="bg-[#1c1c1c] rounded-[1.8rem] overflow-hidden border border-[#222]">
-                  <button 
-                    onClick={() => setExpandedSection(expandedSection === group.title ? '' : group.title)}
-                    className="w-full flex justify-between items-center p-4 hover:bg-[#222] transition-colors"
-                  >
-                    <span className="font-black text-white text-[10px] uppercase tracking-[0.1em]">{group.title}</span>
-                    {expandedSection === group.title ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
-                  </button>
-                  {expandedSection === group.title && (
-                    <div className="p-4 grid grid-cols-1 gap-2 bg-white">
-                      {group.items.map((item, i) => (
-                        <div key={i} className={`flex justify-between items-center p-3.5 rounded-2xl border-2 ${item.status === 'warning' ? 'bg-rose-50 border-rose-100' : 'bg-[#1c1c1c] border-slate-50'}`}>
-                          <div>
-                            <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5">{item.label}</p>
-                            <p className="text-sm font-black text-gray-100">{item.value} <span className="text-[10px] text-gray-400 ml-1 italic">{item.unit}</span></p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[9px] text-gray-500 font-bold uppercase">REF: {item.ref}</p>
-                            {item.status === 'warning' && <AlertCircle className="h-4 w-4 text-rose-500 ml-auto mt-1" />}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+            <h3 className="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-wider">
+              Dose Desta Semana
+            </h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-montserrat tracking-tight">
+                74
+              </span>
+              <span className="text-xs sm:text-sm font-bold text-gray-400 uppercase">
+                cliques (unid.)
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-[#1f1f1f] flex flex-col gap-1">
+            <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-300">
+              <span className="text-gray-400">Ontem:</span>
+              <span className="text-red-400 font-black">37 cliques</span>
+            </div>
+            <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-300">
+              <span className="text-gray-400">Hoje:</span>
+              <span className="text-emerald-400 font-black">37 cliques</span>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD 2: CARGA RESTANTE DA CANETA */}
+        <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full hover:border-[#2a2a2a] transition-all">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-900/20 px-2.5 py-1 rounded-lg border border-emerald-900/30">
+                {stats.percentRemaining}% Disponível
+              </span>
+              <Timer className="w-5 h-5 text-emerald-500" />
+            </div>
+            <h3 className="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-wider">
+              Carga Restante
+            </h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-montserrat tracking-tight">
+                {stats.remaining}
+              </span>
+              <span className="text-xs sm:text-sm font-bold text-gray-400 uppercase">
+                / {stats.totalCap} u
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-[#1f1f1f]">
+            <div className="w-full h-3 bg-[#1c1c1c] rounded-full overflow-hidden border border-[#2a2a2a] p-0.5 mb-2">
+              <div 
+                className="h-full bg-gradient-to-r from-red-600 to-rose-500 rounded-full transition-all duration-700"
+                style={{ width: `${stats.percentRemaining}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] sm:text-xs font-bold text-gray-400">
+              <span>Utilizado: <b className="text-white">{stats.used} u</b></span>
+              <span>Total: <b className="text-white">{stats.totalCap} u</b></span>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD 3: DOSES RESTANTES & PROJEÇÃO */}
+        <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full hover:border-[#2a2a2a] transition-all">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-blue-400 bg-blue-900/20 px-2.5 py-1 rounded-lg border border-blue-900/30">
+                Autonomia
+              </span>
+              <CalendarDays className="w-5 h-5 text-blue-500" />
+            </div>
+            <h3 className="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-wider">
+              Doses Restantes
+            </h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-montserrat tracking-tight">
+                {stats.dosesRemaining}
+              </span>
+              <span className="text-xs sm:text-sm font-bold text-gray-400 uppercase">
+                doses (de 37u)
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-[#1f1f1f] text-[10px] sm:text-xs font-bold text-gray-300 flex justify-between items-center">
+            <span className="text-gray-400">Duração estimada:</span>
+            <span className="text-white font-black">~{stats.weeksRemaining} sem. restantes</span>
+          </div>
+        </div>
+
+        {/* CARD 4: AÇÃO RÁPIDA / REGISTRAR DOSE */}
+        <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full hover:border-[#2a2a2a] transition-all">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-400 bg-red-900/20 px-2.5 py-1 rounded-lg border border-red-900/30">
+                {globalHistory.filter(h => h.units && h.units > 0).length} Feitas
+              </span>
+              <CheckCircle2 className="w-5 h-5 text-red-500" />
+            </div>
+            <h3 className="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-wider">
+              Aplicação de Dose
+            </h3>
+            <p className="text-xs text-gray-300 mt-1 font-medium">
+              Cada dose equivale a 37 cliques (0,5 mg)
+            </p>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-[#1f1f1f]">
+            <button 
+              onClick={() => takeCaneta(37)}
+              disabled={ozempic.remainingUnits < 37}
+              className="w-full py-3 sm:py-3.5 bg-red-600 hover:bg-red-700 active:scale-95 disabled:opacity-50 text-white rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-900/30 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Registrar +37 cliques</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* SEÇÃO SEGUINTE: PRESCRIÇÃO E ORIENTAÇÕES (TAMBÉM 2 EM 2 COM O MESMO TAMANHO) */}
+      <div className="grid grid-cols-2 gap-3.5 sm:gap-5 lg:gap-6 items-stretch">
+        
+        {/* CARD 5: PRESCRIÇÃO E HISTÓRICO DAS 4 DOSES */}
+        <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full">
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-red-900/20 flex items-center justify-center text-red-500 border border-red-900/30">
+                <Beaker className="w-4 h-4" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider font-montserrat">
+                Aplicações Registradas
+              </h3>
+            </div>
+
+            <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+              {globalHistory.slice(0, 5).map((item) => (
+                <div key={item.id} className="p-3 bg-[#181818] rounded-xl border border-[#222] flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-black text-white">{item.name}</p>
+                    <p className="text-[10px] text-gray-400 font-bold mt-0.5">{item.timestamp}</p>
+                  </div>
+                  <span className="text-xs font-black text-red-400 bg-red-950/40 px-2 py-1 rounded-lg border border-red-900/30">
+                    37 u
+                  </span>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* NUTROBARRA ESPECIAL */}
-          <section className="bg-slate-900 rounded-[2.5rem] p-6 shadow-xl border border-white/10 overflow-hidden relative">
-            <div className="flex justify-between items-start mb-4 relative z-10">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                  <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em]">Prescrição Ativa</span>
-                </div>
-                <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Prescrição Médica da Caneta</h2>
+          <div className="mt-4 pt-3 border-t border-[#1f1f1f] flex justify-between items-center text-[10px] font-bold text-gray-400">
+            <span>Ciclo iniciado em 28/09/2026</span>
+            <span className="text-white font-black">4 aplicações feitas (148 u)</span>
+          </div>
+        </div>
+
+        {/* CARD 6: SUPORTE MÉDICO E ORIENTAÇÕES */}
+        <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full">
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-emerald-900/20 flex items-center justify-center text-emerald-500 border border-emerald-900/30">
+                <AlertCircle className="w-4 h-4" />
               </div>
-              <button 
-                onClick={() => setShowPrescription(!showPrescription)}
-                className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition-all cursor-pointer"
+              <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider font-montserrat">
+                Orientações & Suporte
+              </h3>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="p-2.5 bg-[#181818] rounded-xl border border-[#222]">
+                <p className="font-black text-red-400 uppercase text-[10px]">Vonau Flash 8mg (SOS)</p>
+                <p className="text-gray-300 text-[11px] mt-0.5">Tomar 1 cp até 8/8h se houver náuseas ou refluxo.</p>
+              </div>
+              <div className="p-2.5 bg-[#181818] rounded-xl border border-[#222]">
+                <p className="font-black text-emerald-400 uppercase text-[10px]">Hidratação Obrigatória</p>
+                <p className="text-gray-300 text-[11px] mt-0.5">Mínimo de 3 litros de água ao longo do dia.</p>
+              </div>
+              <div className="p-2.5 bg-[#181818] rounded-xl border border-[#222]">
+                <p className="font-black text-blue-400 uppercase text-[10px]">Protocolo Alimentar</p>
+                <p className="text-gray-300 text-[11px] mt-0.5">Priorizar proteínas magras e musculação contínua.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-[#1f1f1f] flex justify-between items-center text-[10px] font-bold text-gray-400">
+            <span>Peso inicial: <b className="text-white">103,6 kg</b></span>
+            <span className="text-red-400 font-black">Dr. Noé Reavaliação</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* VITAMINAS & SUPLEMENTAÇÃO: 2 EM 2 COM MESMO TAMANHO */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">
+          Suplementação & Vitaminas (Controle de Doses)
+        </h3>
+        
+        <div className="grid grid-cols-2 gap-3.5 sm:gap-5 lg:gap-6 items-stretch">
+          {Object.keys(vitamins).map(key => {
+            const v = vitamins[key];
+            return (
+              <div 
+                key={key} 
+                className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full hover:border-[#2a2a2a] transition-all"
               >
-                {showPrescription ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3 mb-4 bg-white/5 p-3 rounded-2xl border border-white/5 relative z-10">
-              <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center text-white font-black text-xs">MED</div>
-              <div>
-                <p className="text-xs font-black text-white italic">Prescrição Médica Atualizada</p>
-                <p className="text-[9px] font-bold text-white/40 uppercase">Reinício: 28/09/2026 • Peso: 103,6 kg</p>
-              </div>
-            </div>
-
-            {showPrescription && (
-              <div className="space-y-4 animate-in slide-in-from-top-4 duration-300 relative z-10 border-t border-white/10 pt-4">
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <p className="text-[10px] font-black text-red-400 uppercase mb-3 tracking-widest">Protocolo de Aplicação</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-white/60 font-bold">Dose Semanal</span>
-                      <span className="text-white font-black">37 clicks (0,5 mg / "meio")</span>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-red-900/20 text-red-500 flex items-center justify-center border border-red-900/30">
+                      {key === 'iron' ? <Droplet size={18} /> : <Pill size={18} />}
                     </div>
-                    <div className="flex justify-between items-center text-xs pt-1 border-t border-white/5">
-                      <span className="text-white/60 font-bold">Dia de Aplicação</span>
-                      <span className="text-red-400 font-black">Toda Segunda-feira</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs pt-1 border-t border-white/5">
-                      <span className="text-white/60 font-bold">1ª Dose Aplicada</span>
-                      <span className="text-emerald-400 font-bold">Segunda, 28/09/2026 (Ontem)</span>
-                    </div>
-                    <p className="text-[9px] text-white/40 mt-2 italic leading-relaxed">
-                      * Girar o anel dosador até ouvir 37 clicks. Aplicar via subcutânea 1x por semana nas segundas-feiras.
-                    </p>
+                    <span className="text-[10px] font-black uppercase text-gray-400 bg-[#1c1c1c] px-2 py-0.5 rounded-md">
+                      {key === 'iron' ? 'Trimestral' : v.cyclePhase === 'active' ? 'Ciclo 15d' : 'Pausa 60d'}
+                    </span>
                   </div>
+                  
+                  <h4 className="text-sm sm:text-base font-black text-white uppercase tracking-tight font-montserrat">
+                    {v.name}
+                  </h4>
+                  <p className="text-[10px] text-gray-400 mt-1 font-medium">
+                    {v.description || 'Suplementação prescrita'}
+                  </p>
                 </div>
 
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <p className="text-[10px] font-black text-red-400 uppercase mb-3 tracking-widest">Orientações Obrigatórias</p>
-                  <ul className="space-y-2">
-                    {[
-                      "37 clicks aplicados semanalmente às segundas-feiras",
-                      "Dieta hipocalórica (elaborada por nutricionista)",
-                      "Exercício físico regular (musculação)",
-                      "Hidratação adequada (mínimo 3L água)",
-                      "Evitar alimentos gordurosos e álcool"
-                    ].map((text, i) => (
-                      <li key={i} className="flex items-center gap-2 text-[11px] font-bold text-white/80">
-                        <CheckCircle2 size={12} className="text-red-500 shrink-0" />
-                        {text}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="bg-red-500/10 p-4 rounded-2xl border border-amber-500/20">
-                  <p className="text-[10px] font-black text-red-500 uppercase mb-1 tracking-widest">Suporte a Náuseas</p>
-                  <p className="text-[11px] font-black text-white/90">Vonau Flash 8mg</p>
-                  <p className="text-[10px] text-white/40 mt-1">Tomar 1 cp até de 8/8 horas SOS caso náusea/vômitos.</p>
-                </div>
-              </div>
-            )}
-            <List className="absolute -right-6 -bottom-6 h-32 w-32 text-white/5" />
-          </section>
-
-          {/* VITAMINAS / OUTROS INJETÁVEIS */}
-          <div className="space-y-4">
-            {Object.keys(vitamins).map(key => (
-              <div key={key} className="bg-white rounded-[2.2rem] p-6 border border-[#333] shadow-sm flex items-center justify-between">
-                <div className="flex gap-4 items-center">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${key === 'iron' ? 'bg-amber-100 text-red-500' : 'bg-blue-100 text-red-500'} shadow-inner`}>
-                    {key === 'iron' ? <Droplet className="h-7 w-7" /> : <Pill className="h-7 w-7" />}
-                  </div>
+                <div className="mt-4 pt-3 border-t border-[#1f1f1f] flex items-center justify-between">
                   <div>
-                    <h3 className="font-black text-lg text-gray-100 uppercase tracking-tighter italic">{vitamins[key].name}</h3>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.1em] bg-[#1c1c1c] px-2 py-0.5 rounded-md inline-block mt-1">
-                      {key === 'iron' ? 'Trimestral' : vitamins[key].cyclePhase === 'active' ? 'Ciclo 15 d' : 'Descanso 60 d'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-[9px] uppercase font-black text-gray-500">Próxima</p>
-                    <p className="font-black text-lg text-gray-100 tracking-tight">{vitamins[key].nextDose ? new Date(vitamins[key].nextDose).toLocaleDateString('pt-BR') : '--/--/--'}</p>
+                    <span className="text-[9px] font-black text-gray-500 uppercase block">Próxima</span>
+                    <span className="text-xs sm:text-sm font-black text-white">
+                      {v.nextDose ? new Date(v.nextDose).toLocaleDateString('pt-BR') : 'Disponível'}
+                    </span>
                   </div>
                   <button 
-                    onClick={() => takeVitamin(key)} 
-                    className="w-12 h-12 bg-slate-900 text-white rounded-2xl shadow-lg active:scale-90 transition-all flex items-center justify-center"
+                    onClick={() => takeVitamin(key)}
+                    className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1.5 shadow-md shadow-red-900/30"
                   >
-                    <CheckCircle2 className="h-5 w-5" />
+                    <CheckCircle2 size={14} />
+                    <span>Tomar</span>
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
 
     </div>
   );
 };
-

@@ -141,6 +141,8 @@ export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser })
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
 
+  const lastSavedWorkoutsRef = useRef<string>('');
+
   useEffect(() => {
     if (currentUser) {
       const unsubscribe = subscribeToProgressData(currentUser.id, (cloudData) => {
@@ -149,9 +151,17 @@ export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser })
           const newInitials = initialWorkouts.filter(w => !existingIds.has(w.id));
           const merged = [...cloudData.workouts, ...newInitials];
           setWorkouts(merged);
+          lastSavedWorkoutsRef.current = JSON.stringify(merged);
           localStorage.setItem(`workouts_${currentUser.id}`, JSON.stringify(merged));
         } else {
-          setWorkouts(initialWorkouts);
+          const saved = localStorage.getItem(`workouts_${currentUser.id}`);
+          if (saved) {
+            setWorkouts(JSON.parse(saved));
+            lastSavedWorkoutsRef.current = saved;
+          } else {
+            setWorkouts(initialWorkouts);
+            lastSavedWorkoutsRef.current = JSON.stringify(initialWorkouts);
+          }
         }
         setIsDataLoaded(true);
       });
@@ -163,8 +173,12 @@ export const ExerciseTracker: React.FC<ExerciseTrackerProps> = ({ currentUser })
 
   useEffect(() => {
     if (currentUser && isDataLoaded) {
-      saveProgressData(currentUser.id, { workouts }).catch(console.error);
-      localStorage.setItem(`workouts_${currentUser.id}`, JSON.stringify(workouts));
+      const currentStr = JSON.stringify(workouts);
+      if (lastSavedWorkoutsRef.current !== '' && currentStr !== lastSavedWorkoutsRef.current) {
+        lastSavedWorkoutsRef.current = currentStr;
+        localStorage.setItem(`workouts_${currentUser.id}`, currentStr);
+        saveProgressData(currentUser.id, { workouts }).catch(console.warn);
+      }
     }
   }, [workouts, currentUser, isDataLoaded]);
 

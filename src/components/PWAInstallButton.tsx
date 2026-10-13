@@ -57,9 +57,9 @@ export const PWAInstallButton: React.FC = () => {
 
             <div className="space-y-3 text-xs text-gray-300">
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#1c1c1c] border border-[#222]">
-                <img src="/pwa-192x192.png" alt="Ícone App" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
+                <img src="/pwa-192x192.png" alt="Logotipo CONTROLE DE SAÚDE" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
                 <div>
-                  <p className="font-black text-white text-sm">Saúde+Treino</p>
+                  <p className="font-black text-white text-sm">CONTROLE DE SAÚDE</p>
                   <p className="text-[10px] text-gray-500 uppercase">Ícone oficial na tela inicial</p>
                 </div>
               </div>
