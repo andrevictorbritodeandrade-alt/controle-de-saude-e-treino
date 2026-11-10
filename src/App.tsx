@@ -344,19 +344,36 @@ const App = () => {
       fatArmLeft: '2.6', fatArmRight: '2.6', fatTrunk: '17.0', fatLegLeft: '5.0', fatLegRight: '5.0'
     },
     {
-      id: 19, date: '2026/09/28', time: '10:00:00',
-      weight: '103.6', weightStatus: 'Obeso', bmi: '32.0', bodyFat: '35.0', fatWeight: '36.3',
-      skeletalMuscle: '36.8', skeletalMuscleWeight: '36.0', muscleRate: '36.8', muscleWeight: '36.0',
-      water: '47.5', waterWeight: '49.2', visceralFat: '15.0', boneMass: '5.0',
-      metabolism: '1800.0', protein: '13.0', obesityLevel: '144.0', metabolicAge: '46.0',
-      lbm: '67.3', realAge: '36', height: '180',
+      id: 19, date: '2026/09/28', time: '14:09:00',
+      weight: '103.6', weightStatus: 'Obeso', bmi: '32.0', bodyFat: '35.8', fatWeight: '37.0',
+      skeletalMuscle: '37.3', skeletalMuscleWeight: '37.3', muscleRate: '37.3', muscleWeight: '37.3',
+      water: '48.4', waterWeight: '48.4', visceralFat: '16.0', boneMass: '5.12',
+      metabolism: '1807.0', protein: '13.0', obesityLevel: '145.0', metabolicAge: '46.0',
+      lbm: '66.6', realAge: '37', height: '180',
+      inbodyScore: '60', whr: '0.95',
       skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
       chest: '---', waist: '---', abdomen: '---', hip: '---',
       thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
       calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
       forearmRight: '---', forearmLeft: '---',
-      leanArmLeft: '3.50', leanArmRight: '3.50', leanTrunk: '28.1', leanLegLeft: '10.21', leanLegRight: '10.21',
-      fatArmLeft: '2.6', fatArmRight: '2.6', fatTrunk: '17.0', fatLegLeft: '5.0', fatLegRight: '5.0'
+      leanArmLeft: '3.60', leanArmRight: '3.50', leanTrunk: '28.2', leanLegLeft: '10.31', leanLegRight: '10.40',
+      fatArmLeft: '3.0', fatArmRight: '3.0', fatTrunk: '18.4', fatLegLeft: '5.6', fatLegRight: '5.6'
+    },
+    {
+      id: 20, date: '2026/11/09', time: '15:21:00',
+      weight: '101.9', weightStatus: 'Obeso', bmi: '31.5', bodyFat: '35.7', fatWeight: '36.4',
+      skeletalMuscle: '36.8', skeletalMuscleWeight: '36.8', muscleRate: '36.8', muscleWeight: '36.8',
+      water: '47.5', waterWeight: '47.5', visceralFat: '16.0', boneMass: '5.13',
+      metabolism: '1785.0', protein: '12.9', obesityLevel: '143.0', metabolicAge: '46.0',
+      lbm: '65.5', realAge: '37', height: '180',
+      inbodyScore: '60', whr: '0.97',
+      skinfoldChest: '0,0', skinfoldAbdo: '0,0', skinfoldThigh: '0,0', skinfoldSum: '0,0', bodyDensity: '1,1',
+      chest: '---', waist: '---', abdomen: '---', hip: '---',
+      thighRightPx: '---', thighLeftPx: '---', thighRightDt: '---', thighLeftDt: '---',
+      calfRight: '---', calfLeft: '---', armRight: '---', armLeft: '---',
+      forearmRight: '---', forearmLeft: '---',
+      leanArmLeft: '3.71', leanArmRight: '3.60', leanTrunk: '28.8', leanLegLeft: '9.71', leanLegRight: '9.71',
+      fatArmLeft: '2.9', fatArmRight: '3.0', fatTrunk: '19.0', fatLegLeft: '5.0', fatLegRight: '5.0'
     }
   ]);
   

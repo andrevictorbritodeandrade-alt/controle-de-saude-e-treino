@@ -4,8 +4,9 @@ import { User } from '../types';
 import { savePoviztraData, subscribeToPoviztraData } from '../services/firestoreService';
 
 const DEFAULT_HISTORY = [
-  { id: 104, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Hoje)', timestamp: '13/10/2026 08:00:00', units: 37 },
-  { id: 103, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Ontem)', timestamp: '12/10/2026 08:00:00', units: 37 },
+  { id: 105, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 4 - Hoje)', timestamp: '19/10/2026 08:00:00', units: 37 },
+  { id: 104, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3)', timestamp: '13/10/2026 08:00:00', units: 37 },
+  { id: 103, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3)', timestamp: '12/10/2026 08:00:00', units: 37 },
   { id: 102, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 2)', timestamp: '05/10/2026 08:00:00', units: 37 },
   { id: 101, name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 1)', timestamp: '28/09/2026 08:00:00', units: 37 },
   { id: 20, name: 'Dose Caneta (6 clicks - Semana 4)', timestamp: '02/06/2026 08:00:00', units: 6 },
@@ -18,14 +19,14 @@ const DEFAULT_HISTORY = [
 const DEFAULT_OZEMPIC = {
   name: 'Caneta Poviztra',
   totalUnits: 300,
-  remainingUnits: 152, // 300 - (4 * 37) = 152 cliques restantes
+  remainingUnits: 115, // 300 - (5 * 37) = 115 cliques restantes
   startWeight: 103.6,
   purchaseDate: '2026-09-28',
   startDate: '2026-09-28',
   doseClicks: 37, // 37 cliques por aplicação
-  weeklyDoseClicks: 74, // Aumentou a dose: 2x 37 = 74 cliques nesta semana 3
-  doseEquivalent: '0,5 mg x 2 (1,0 mg na semana 3)',
-  frequency: 'Semanal (2 aplicações de 37 cliques)',
+  weeklyDoseClicks: 37, // Dose semanal
+  doseEquivalent: '0,5 mg (37 cliques)',
+  frequency: 'Semanal (37 cliques)',
 };
 
 const DEFAULT_VITAMINS = {
@@ -80,12 +81,13 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           currentVitamins = savedVits ? JSON.parse(savedVits) : { ...DEFAULT_VITAMINS };
         }
 
-        // Garantir que as 4 doses do ciclo atual (Semana 1 a 3) estejam registradas
+        // Garantir que as 5 doses do ciclo atual (Semana 1 a 4) estejam registradas
         const requiredDoses = [
           { check: '28/09/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 1)', timestamp: '28/09/2026 08:00:00', units: 37 },
           { check: '05/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 2)', timestamp: '05/10/2026 08:00:00', units: 37 },
-          { check: '12/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Ontem)', timestamp: '12/10/2026 08:00:00', units: 37 },
-          { check: '13/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3 - Hoje)', timestamp: '13/10/2026 08:00:00', units: 37 },
+          { check: '12/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3)', timestamp: '12/10/2026 08:00:00', units: 37 },
+          { check: '13/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 3)', timestamp: '13/10/2026 08:00:00', units: 37 },
+          { check: '19/10/2026', name: 'Dose Caneta Poviztra (37 cliques [0,5mg] - Semana 4 - Hoje)', timestamp: '19/10/2026 08:00:00', units: 37 },
         ];
 
         let historyUpdated = false;
@@ -102,12 +104,12 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
           }
         });
 
-        // Garantir que a carga da caneta reflita os 152 cliques restantes de 300
+        // Garantir que a carga da caneta reflita os 115 cliques restantes de 300
         currentOzempic.totalUnits = 300;
-        currentOzempic.remainingUnits = 152;
+        currentOzempic.remainingUnits = 115;
         currentOzempic.startDate = '2026-09-28';
         currentOzempic.doseClicks = 37;
-        currentOzempic.weeklyDoseClicks = 74;
+        currentOzempic.weeklyDoseClicks = 37;
 
         if (historyUpdated) {
           currentHistory.sort((a, b) => {
@@ -200,18 +202,18 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
   // --- ESTATÍSTICAS E CÁLCULOS DO CICLO ATUAL ---
   const stats = useMemo(() => {
     const totalCap = ozempic.totalUnits || 300;
-    const remaining = ozempic.remainingUnits ?? 152;
-    const used = totalCap - remaining; // 148
+    const remaining = ozempic.remainingUnits ?? 115;
+    const used = totalCap - remaining; // 185
     const singleDose = ozempic.doseClicks || 37;
-    const currentWeek = 3; // Usuário confirmou explicitamente que está na semana 3
-    const weeklyClicks = ozempic.weeklyDoseClicks || 74; // 2x 37 = 74 cliques nesta semana
+    const currentWeek = 4; // Semana 4 (19/10/2026)
+    const weeklyClicks = ozempic.weeklyDoseClicks || 37; // 37 cliques semanais
 
-    const dosesRemaining = Math.max(0, Math.floor(remaining / singleDose)); // 4 doses de 37
-    const weeksRemaining = weeklyClicks > 0 ? (remaining / weeklyClicks).toFixed(1) : '4';
+    const dosesRemaining = Math.max(0, Math.floor(remaining / singleDose)); // 3 doses de 37
+    const weeksRemaining = weeklyClicks > 0 ? (remaining / weeklyClicks).toFixed(1) : '3';
 
-    // Próxima aplicação prevista
+    // Próxima aplicação prevista (segunda-feira seguinte)
     const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + 6);
+    nextDate.setDate(nextDate.getDate() + 7);
 
     return {
       totalCap,
@@ -279,22 +281,22 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
               <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight italic font-montserrat">
                 Caneta Poviztra
               </h2>
-              <span className="bg-red-900/30 text-red-400 border border-red-900/50 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
-                Semana 3 Ativa
+              <span className="bg-emerald-900/30 text-emerald-400 border border-emerald-900/50 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+                Semana 4 Ativa
               </span>
             </div>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-0.5">
-              Dose aumentada • 37 unidades ontem + 37 unidades hoje (74 cliques na semana)
+              Dose semanal • 37 unidades aplicadas hoje (19/10/2026)
             </p>
           </div>
         </div>
 
         <button 
           onClick={() => {
-            if (window.confirm('Deseja redefinir a caneta com 300 unidades e 152 restantes para a Semana 3?')) {
+            if (window.confirm('Deseja redefinir a caneta com 300 unidades e 115 restantes para a Semana 4?')) {
               setOzempic({
                 ...DEFAULT_OZEMPIC,
-                remainingUnits: 152,
+                remainingUnits: 115,
                 totalUnits: 300,
               });
             }
@@ -314,32 +316,32 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
         <div className="bg-[#121212] rounded-[2rem] p-5 sm:p-6 border border-[#1f1f1f] shadow-lg flex flex-col justify-between h-full hover:border-[#2a2a2a] transition-all">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-500 bg-red-900/20 px-2.5 py-1 rounded-lg border border-red-900/30">
-                Semana 3 • Dose Dupla
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-900/20 px-2.5 py-1 rounded-lg border border-emerald-900/30">
+                Semana 4 • Aplicada
               </span>
-              <Droplet className="w-5 h-5 text-red-500" />
+              <Droplet className="w-5 h-5 text-emerald-500" />
             </div>
             <h3 className="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-wider">
               Dose Desta Semana
             </h3>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-montserrat tracking-tight">
-                74
+                37
               </span>
               <span className="text-xs sm:text-sm font-bold text-gray-400 uppercase">
-                cliques (unid.)
+                cliques hoje
               </span>
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-[#1f1f1f] flex flex-col gap-1">
             <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-300">
-              <span className="text-gray-400">Ontem:</span>
-              <span className="text-red-400 font-black">37 cliques</span>
+              <span className="text-gray-400">Hoje (19/10):</span>
+              <span className="text-emerald-400 font-black">37 cliques</span>
             </div>
             <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-300">
-              <span className="text-gray-400">Hoje:</span>
-              <span className="text-emerald-400 font-black">37 cliques</span>
+              <span className="text-gray-400">Total no Ciclo:</span>
+              <span className="text-white font-black">5 aplicações (185 u)</span>
             </div>
           </div>
         </div>
@@ -471,7 +473,7 @@ export const PoviztraControl: React.FC<{ currentUser: User }> = ({ currentUser }
 
           <div className="mt-4 pt-3 border-t border-[#1f1f1f] flex justify-between items-center text-[10px] font-bold text-gray-400">
             <span>Ciclo iniciado em 28/09/2026</span>
-            <span className="text-white font-black">4 aplicações feitas (148 u)</span>
+            <span className="text-white font-black">{Math.round(stats.used / (stats.singleDose || 37))} aplicações feitas ({stats.used} u)</span>
           </div>
         </div>
 

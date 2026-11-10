@@ -268,6 +268,62 @@ const INITIAL_CLINICAL_DATA: Assessment[] = [
     fatTrunk: 17.0,
     fatLegLeft: 5.0,
     fatLegRight: 5.0
+  },
+  {
+    id: 10,
+    date: '28/09/2026',
+    time: '14:09',
+    weight: 103.6,
+    bodyFat: 35.8,
+    fatWeight: 37.0,
+    skeletalMuscleWeight: 37.3,
+    waterWeight: 48.4,
+    protein: 13.0,
+    boneMass: 5.12,
+    metabolism: 1807,
+    bmi: 32.0,
+    visceralFat: 16,
+    obesityLevel: 145.0,
+    inbodyScore: 60,
+    whr: 0.95,
+    leanArmLeft: 3.60,
+    leanArmRight: 3.50,
+    leanTrunk: 28.2,
+    leanLegLeft: 10.31,
+    leanLegRight: 10.40,
+    fatArmLeft: 3.0,
+    fatArmRight: 3.0,
+    fatTrunk: 18.4,
+    fatLegLeft: 5.6,
+    fatLegRight: 5.6
+  },
+  {
+    id: 11,
+    date: '09/11/2026',
+    time: '15:21',
+    weight: 101.9,
+    bodyFat: 35.7,
+    fatWeight: 36.4,
+    skeletalMuscleWeight: 36.8,
+    waterWeight: 47.5,
+    protein: 12.9,
+    boneMass: 5.13,
+    metabolism: 1785,
+    bmi: 31.5,
+    visceralFat: 16,
+    obesityLevel: 143.0,
+    inbodyScore: 60,
+    whr: 0.97,
+    leanArmLeft: 3.71,
+    leanArmRight: 3.60,
+    leanTrunk: 28.8,
+    leanLegLeft: 9.71,
+    leanLegRight: 9.71,
+    fatArmLeft: 2.9,
+    fatArmRight: 3.0,
+    fatTrunk: 19.0,
+    fatLegLeft: 5.0,
+    fatLegRight: 5.0
   }
 ];
 
@@ -285,13 +341,8 @@ export const NutrobarraMetrics: React.FC<{ currentUser: UserType }> = ({ current
           if (index === -1) {
             merged.push(initItem);
           } else {
-            // Overwrite weight and other metrics to force the latest status update accurately
-            merged[index].weight = initItem.weight;
-            merged[index].bodyFat = initItem.bodyFat;
-            merged[index].fatWeight = initItem.fatWeight;
-            merged[index].skeletalMuscleWeight = initItem.skeletalMuscleWeight;
-            merged[index].waterWeight = initItem.waterWeight;
-            merged[index].bmi = initItem.bmi;
+            // Overwrite all metrics to force the latest status update accurately
+            merged[index] = { ...merged[index], ...initItem };
           }
         });
 
@@ -311,8 +362,14 @@ export const NutrobarraMetrics: React.FC<{ currentUser: UserType }> = ({ current
   });
 
   const [activeSubTab, setActiveSubTab] = useState<'evolucao' | 'comparador' | 'segmentar' | 'otimizacao' | 'formulario'>('evolucao');
-  const [selectedAssessmentId1, setSelectedAssessmentId1] = useState<number>(INITIAL_CLINICAL_DATA[0].id);
-  const [selectedAssessmentId2, setSelectedAssessmentId2] = useState<number>(INITIAL_CLINICAL_DATA[INITIAL_CLINICAL_DATA.length - 1]?.id || INITIAL_CLINICAL_DATA[1].id);
+  const [selectedAssessmentId1, setSelectedAssessmentId1] = useState<number>(() => {
+    const prevMonth = INITIAL_CLINICAL_DATA.find(a => a.date === '28/09/2026');
+    return prevMonth ? prevMonth.id : INITIAL_CLINICAL_DATA[0].id;
+  });
+  const [selectedAssessmentId2, setSelectedAssessmentId2] = useState<number>(() => {
+    const todayExam = INITIAL_CLINICAL_DATA.find(a => a.date === '09/11/2026');
+    return todayExam ? todayExam.id : INITIAL_CLINICAL_DATA[INITIAL_CLINICAL_DATA.length - 1]?.id;
+  });
   const [showAddSuccess, setShowAddSuccess] = useState(false);
 
   // Optimizer sliders and states
@@ -433,6 +490,57 @@ export const NutrobarraMetrics: React.FC<{ currentUser: UserType }> = ({ current
       lastDate: last.date
     };
   }, [assessments]);
+
+  const [comparisonPairKey, setComparisonPairKey] = useState<'nov-vs-sep' | 'sep-vs-jul'>('nov-vs-sep');
+
+  // Comparativo com o Mês Anterior (Exame Recente vs Mês Anterior)
+  const monthOverMonthData = useMemo(() => {
+    const sorted = [...assessments];
+    if (sorted.length < 2) return null;
+
+    let latest = sorted.find(a => a.date === '09/11/2026') || sorted[sorted.length - 1];
+    let prev = sorted.find(a => a.date === '28/09/2026') || sorted[sorted.length - 2];
+
+    if (comparisonPairKey === 'sep-vs-jul') {
+      const sep = sorted.find(a => a.date === '28/09/2026');
+      const jul = sorted.find(a => a.date === '06/07/2026');
+      if (sep && jul) {
+        latest = sep;
+        prev = jul;
+      }
+    }
+
+    return {
+      pairKey: comparisonPairKey,
+      prevDate: prev.date,
+      latestDate: latest.date,
+      prev,
+      latest,
+      dWeight: latest.weight - prev.weight,
+      dBmi: latest.bmi - prev.bmi,
+      dFatPercent: latest.bodyFat - prev.bodyFat,
+      dFatWeight: latest.fatWeight - prev.fatWeight,
+      dMuscle: latest.skeletalMuscleWeight - prev.skeletalMuscleWeight,
+      dWater: latest.waterWeight - prev.waterWeight,
+      dProtein: latest.protein - prev.protein,
+      dBone: latest.boneMass - prev.boneMass,
+      dScore: latest.inbodyScore - prev.inbodyScore,
+      dBmr: latest.metabolism - prev.metabolism,
+      dVisceral: latest.visceralFat - prev.visceralFat,
+      dWhr: latest.whr - prev.whr,
+      dObesity: latest.obesityLevel - prev.obesityLevel,
+      dLeanArmL: (latest.leanArmLeft || 0) - (prev.leanArmLeft || 0),
+      dLeanArmR: (latest.leanArmRight || 0) - (prev.leanArmRight || 0),
+      dLeanTrunk: (latest.leanTrunk || 0) - (prev.leanTrunk || 0),
+      dLeanLegL: (latest.leanLegLeft || 0) - (prev.leanLegLeft || 0),
+      dLeanLegR: (latest.leanLegRight || 0) - (prev.leanLegRight || 0),
+      dFatArmL: (latest.fatArmLeft || 0) - (prev.fatArmLeft || 0),
+      dFatArmR: (latest.fatArmRight || 0) - (prev.fatArmRight || 0),
+      dFatTrunk: (latest.fatTrunk || 0) - (prev.fatTrunk || 0),
+      dFatLegL: (latest.fatLegLeft || 0) - (prev.fatLegLeft || 0),
+      dFatLegR: (latest.fatLegRight || 0) - (prev.fatLegRight || 0),
+    };
+  }, [assessments, comparisonPairKey]);
 
   // Formatter for Recharts
   const chartData = useMemo(() => {
@@ -626,6 +734,215 @@ Gere um guia e regras terapêuticas práticas para reverter esse catabolismo de 
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
+            {/* CARD DE BIOIMPEDÂNCIA RECENTE & COMPARATIVO COM O MÊS ANTERIOR */}
+            {monthOverMonthData && (
+              <div className="bg-[#121212] border border-[#1f1f1f] rounded-[2.5rem] p-6 shadow-xl space-y-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-[#1c1c1c]">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="bg-red-950/50 text-red-400 border border-red-900/50 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest font-mono">
+                        Comparativo de Exames Oficial
+                      </span>
+                      <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/50 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest font-mono">
+                        {monthOverMonthData.latestDate} vs {monthOverMonthData.prevDate}
+                      </span>
+                    </div>
+
+                    <h2 className="text-xl font-black text-white tracking-tight mt-2 flex items-center gap-2">
+                      {monthOverMonthData.pairKey === 'nov-vs-sep' 
+                        ? `Exame de Novembro (${monthOverMonthData.latestDate}) vs Setembro (${monthOverMonthData.prevDate})`
+                        : `Exame de Setembro (${monthOverMonthData.latestDate}) vs Julho (${monthOverMonthData.prevDate})`}
+                    </h2>
+                    <p className="text-xs text-gray-400 font-medium mt-0.5">
+                      Evolução biométrica entre a avaliação de {monthOverMonthData.prevDate} e o laudo de {monthOverMonthData.latestDate}.
+                    </p>
+
+                    {/* Selector de Par de Comparação */}
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                      <button
+                        onClick={() => setComparisonPairKey('nov-vs-sep')}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+                          comparisonPairKey === 'nov-vs-sep' 
+                            ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-900/30' 
+                            : 'bg-[#1c1c1c] text-gray-400 border-[#2a2a2a] hover:text-white'
+                        }`}
+                      >
+                        Novembro (09/11) vs Setembro (28/09)
+                      </button>
+                      <button
+                        onClick={() => setComparisonPairKey('sep-vs-jul')}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
+                          comparisonPairKey === 'sep-vs-jul' 
+                            ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-900/30' 
+                            : 'bg-[#1c1c1c] text-gray-400 border-[#2a2a2a] hover:text-white'
+                        }`}
+                      >
+                        Setembro (28/09) vs Julho (06/07)
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedAssessmentId1(monthOverMonthData.prev.id);
+                      setSelectedAssessmentId2(monthOverMonthData.latest.id);
+                      setActiveSubTab('comparador');
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shrink-0 active:scale-95 shadow-lg shadow-red-900/20 self-start md:self-center"
+                  >
+                    Abrir Comparador Completo
+                  </button>
+                </div>
+
+                {/* Grid de Principais Indicadores Clínicos com Deltas */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {/* Peso */}
+                  <div className="bg-[#1c1c1c] border border-[#2a2a2a] p-3.5 rounded-2xl">
+                    <span className="text-[9px] font-black text-gray-400 uppercase block">Peso Corporal</span>
+                    <span className="text-lg font-black text-white font-montserrat">{monthOverMonthData.latest.weight} kg</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-[10px] text-gray-500 font-bold">Antes: {monthOverMonthData.prev.weight}k</span>
+                      <span className={`text-[10px] font-black ml-auto px-1.5 py-0.5 rounded ${monthOverMonthData.dWeight <= 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+                        {monthOverMonthData.dWeight > 0 ? '+' : ''}{monthOverMonthData.dWeight.toFixed(1)} kg
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* IMC */}
+                  <div className="bg-[#1c1c1c] border border-[#2a2a2a] p-3.5 rounded-2xl">
+                    <span className="text-[9px] font-black text-gray-400 uppercase block">IMC</span>
+                    <span className="text-lg font-black text-white font-montserrat">{monthOverMonthData.latest.bmi}</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-[10px] text-gray-500 font-bold">Antes: {monthOverMonthData.prev.bmi}</span>
+                      <span className={`text-[10px] font-black ml-auto px-1.5 py-0.5 rounded ${monthOverMonthData.dBmi <= 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+                        {monthOverMonthData.dBmi > 0 ? '+' : ''}{monthOverMonthData.dBmi.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* % Gordura (PGC) */}
+                  <div className="bg-[#1c1c1c] border border-[#2a2a2a] p-3.5 rounded-2xl">
+                    <span className="text-[9px] font-black text-gray-400 uppercase block">% Gordura (PGC)</span>
+                    <span className="text-lg font-black text-amber-400 font-montserrat">{monthOverMonthData.latest.bodyFat}%</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-[10px] text-gray-500 font-bold">Antes: {monthOverMonthData.prev.bodyFat}%</span>
+                      <span className={`text-[10px] font-black ml-auto px-1.5 py-0.5 rounded ${monthOverMonthData.dFatPercent <= 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+                        {monthOverMonthData.dFatPercent > 0 ? '+' : ''}{monthOverMonthData.dFatPercent.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* MME */}
+                  <div className="bg-[#1c1c1c] border border-[#2a2a2a] p-3.5 rounded-2xl">
+                    <span className="text-[9px] font-black text-gray-400 uppercase block">Massa Muscular (MME)</span>
+                    <span className="text-lg font-black text-emerald-400 font-montserrat">{monthOverMonthData.latest.skeletalMuscleWeight} kg</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-[10px] text-gray-500 font-bold">Antes: {monthOverMonthData.prev.skeletalMuscleWeight}k</span>
+                      <span className={`text-[10px] font-black ml-auto px-1.5 py-0.5 rounded ${monthOverMonthData.dMuscle >= 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+                        {monthOverMonthData.dMuscle > 0 ? '+' : ''}{monthOverMonthData.dMuscle.toFixed(1)} kg
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Massa de Gordura (MGC) */}
+                  <div className="bg-[#1c1c1c] border border-[#2a2a2a] p-3.5 rounded-2xl">
+                    <span className="text-[9px] font-black text-gray-400 uppercase block">Gordura Total (MGC)</span>
+                    <span className="text-lg font-black text-red-400 font-montserrat">{monthOverMonthData.latest.fatWeight} kg</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-[10px] text-gray-500 font-bold">Antes: {monthOverMonthData.prev.fatWeight}k</span>
+                      <span className={`text-[10px] font-black ml-auto px-1.5 py-0.5 rounded ${monthOverMonthData.dFatWeight <= 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+                        {monthOverMonthData.dFatWeight > 0 ? '+' : ''}{monthOverMonthData.dFatWeight.toFixed(1)} kg
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* InBody Score */}
+                  <div className="bg-[#1c1c1c] border border-[#2a2a2a] p-3.5 rounded-2xl">
+                    <span className="text-[9px] font-black text-gray-400 uppercase block">Score InBody</span>
+                    <span className="text-lg font-black text-blue-400 font-montserrat">{monthOverMonthData.latest.inbodyScore} / 100</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-[10px] text-gray-500 font-bold">Antes: {monthOverMonthData.prev.inbodyScore}</span>
+                      <span className={`text-[10px] font-black ml-auto px-1.5 py-0.5 rounded ${monthOverMonthData.dScore >= 0 ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}`}>
+                        {monthOverMonthData.dScore > 0 ? '+' : ''}{monthOverMonthData.dScore} pts
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabela de Outros Parâmetros InBody 120 */}
+                <div className="bg-[#181818] border border-[#262626] rounded-2xl p-4">
+                  <h4 className="text-xs font-black text-white uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span>Detalhamento Clínico Completo (InBody120)</span>
+                    <span className="text-[10px] font-bold text-gray-400 font-mono">09/11/2026 vs 28/09/2026</span>
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Água Corporal Total (ACT)</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">{monthOverMonthData.latest.waterWeight} L</span>
+                        <span className="text-[10px] font-bold text-gray-400">Estável ({monthOverMonthData.dWater >= 0 ? '+' : ''}{monthOverMonthData.dWater.toFixed(1)}L)</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Proteínas</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">{monthOverMonthData.latest.protein} kg</span>
+                        <span className="text-[10px] font-bold text-gray-400">{monthOverMonthData.dProtein >= 0 ? '+' : ''}{monthOverMonthData.dProtein.toFixed(1)} kg</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Minerais (Massa Óssea)</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">{monthOverMonthData.latest.boneMass} kg</span>
+                        <span className="text-[10px] font-black text-emerald-400">+{monthOverMonthData.dBone.toFixed(2)} kg</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Taxa Metabólica Basal</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">{monthOverMonthData.latest.metabolism} kcal</span>
+                        <span className="text-[10px] font-bold text-amber-400">{monthOverMonthData.dBmr >= 0 ? '+' : ''}{monthOverMonthData.dBmr} kcal</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Gordura Visceral</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">Nível {monthOverMonthData.latest.visceralFat}</span>
+                        <span className="text-[10px] font-bold text-gray-400">Antes: Nível {monthOverMonthData.prev.visceralFat}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Relação Cintura-Quadril</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">{monthOverMonthData.latest.whr}</span>
+                        <span className="text-[10px] font-bold text-gray-400">Antes: {monthOverMonthData.prev.whr}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Grau de Obesidade</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">{monthOverMonthData.latest.obesityLevel}%</span>
+                        <span className="text-[10px] font-black text-emerald-400">{monthOverMonthData.dObesity}%</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#121212] p-2.5 rounded-xl border border-[#222]">
+                      <span className="text-[9px] font-bold text-gray-500 block uppercase">Meta de Peso Ideal</span>
+                      <div className="flex justify-between items-baseline mt-0.5">
+                        <span className="font-black text-white">77,1 kg</span>
+                        <span className="text-[10px] font-bold text-red-400">-24,8 kg gordura</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Charts section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
